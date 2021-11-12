@@ -1,14 +1,14 @@
 # TEXT TO SPEECH
 
-import gtts
-from playsound import playsound
-
-tts = gtts.gTTS("Hello world")
-tts.save("hello.mp3")
-playsound("hello.mp3")
-
-# SCREEN SHARING
-
+# import gtts
+# from playsound import playsound
+#
+# tts = gtts.gTTS("Hello world")
+# tts.save("hello.mp3")
+# playsound("hello.mp3")
+#
+# # SCREEN SHARING
+#
 import pyautogui
 # im2 = pyautogui.screenshot('my_screenshot2.png', region=(0,0,1920,1080))
 
@@ -58,12 +58,24 @@ from pynput.mouse import Listener
 #     listener.join()
 
 # OPTICAL CHARACTER RECOGNITION
-import cv2
-import pytesseract
+# import cv2
+# import pytesseract
+#
+# img = cv2.imread('image.jpg')
+#
+# # Adding custom options
+# custom_config = r'--oem 3 --psm 6'
+# print(pytesseract.image_to_string(img, config=custom_config))
 
-img = cv2.imread('image.jpg')
+# from pynput.mouse import Listener
+#
+# def on_click(x, y, button, pressed):
+#     print('{0} at {1}'.format(
+#         'Pressed' if pressed else 'Released',
+#         (x, y)))
+#
+#
+# with Listener(on_click=on_click) as listener:
+#     listener.join()
 
-# Adding custom options
-custom_config = r'--oem 3 --psm 6'
-print(pytesseract.image_to_string(img, config=custom_config))
-
+img = pyautogui.screenshot('test.png', region=(242, 397, 810, 170))
