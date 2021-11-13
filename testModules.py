@@ -78,4 +78,13 @@ from pynput.mouse import Listener
 # with Listener(on_click=on_click) as listener:
 #     listener.join()
 
-img = pyautogui.screenshot('test.png', region=(242, 397, 810, 170))
+
+import cv2
+import pytesseract
+
+
+# extract string from image using OCR
+imageForOCR = cv2.imread('test.jpg')
+custom_config = r'--oem 3 --psm 6'
+ttsString = pytesseract.image_to_string(imageForOCR, config=custom_config)
+print(ttsString)

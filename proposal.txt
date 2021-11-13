@@ -1,0 +1,43 @@
+Project Proposal
+
+Project Name: Screen Reader for the Visually Impaired
+
+Project Description:
+
+    The project is a screen reader for the visually impaired which will aid
+    visually impaired users to navigate websites. This aid will be in the form
+    of text-to-speech that will occur whenever the user clicks sections of the
+    webpage.
+
+Competitive Analysis:
+
+
+
+Structural Plan:
+
+
+
+Algorithmic Plan:
+
+
+
+Timeline Plan:
+
+
+
+
+Version Control Plan:
+
+    In order to back up my code I will be using GitHub, in which I will update
+    my private repository on GitHub whenever I make new changes to my project
+    files.
+
+Module List:
+    The following are the modules I will be using for my project:
+        gtts
+        playsound
+        pyautogui
+        pynput
+        openCV
+        pytesseract
+        os
