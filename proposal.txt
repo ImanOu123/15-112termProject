@@ -11,26 +11,70 @@ Project Description:
 
 Competitive Analysis:
 
+    The types of screen readers that exist include built-in screen readers
+    to PC operating systems, such as VoiceOver in Mac PCs and ChromeVox in
+    Chromebooks. These screen readers exist to aid the visually impaired in
+    navigating the whole computer, such as accessing files and utilizing
+    various applications. My project will consist of a similar screen reader on
+    a much smaller scale, in which I will focus on providing aid in reading
+    webpages.
 
+    Another type of screen reader created is one that acts as an extension to a
+    web browser, such as Chrome's Screen Reader. In my project, I will be using
+    some features that I have found to be helpful from this extension. The most
+    prominent feature is the overall usability of the screen reader. In the
+    Google extension, when the user clicks certain parts of a webpage, that
+    specific section is read back to them. In my project I will attempt to
+    implement this feature and will be my main goal with this project.
 
 Structural Plan:
 
-
+    The code will feature different functions that will achieve the goal of
+    the program:
+        1. The main function will deal with how the program interacts with the
+        user, therefore, it will be responsible for how the user can start and
+        end the program. It will also feature the calls to the different helper
+        functions.
+        2. There will exist a helper function that splits the webpage into
+        different sections by coordinates, through the distinguishing of
+        different paragraphs on the webpage and the coordinates of each
+        paragraph. If scrolling is detected this
+        program will run again.
+        3. There will exist a helper function that takes screenshots of each
+        section of the webpage - based on coordinates detected in the previous
+        helper function - and store them for future use
+        4. There will exist a helper function that will perform OCT on each
+        section and associate a string of what's in the screenshot with the
+        coordinates of where that section is located. This information will be
+        stored in a dictionary.
+        5. There will exist a helper function that will detect if the mouse
+        clicks are within any of those coordinates and perform text-to-speech
+        on the strings associated with them.
 
 Algorithmic Plan:
 
+    The trickiest part of the project is to: "identify different sections of
+    the webpage and the coordinates of each section":
 
 
 Timeline Plan:
 
-
-
+    The following is my timeline plan for the project:
+    1. Thursday, November 18th - Complete "identify different sections of
+    the webpage and the coordinates of each section"
+    2. Saturday, November 20th - Complete OCR and mouse click/TTS on sections
+    3. Monday, November 22nd - Complete user interaction and finalize project
+    for MVP
+    4. Wednesday, November 24th - Brainstorm and add extra features
+    5. Friday, November 26th - Finalize project for final submission
 
 Version Control Plan:
 
     In order to back up my code I will be using GitHub, in which I will update
     my private repository on GitHub whenever I make new changes to my project
     files.
+
+    https://drive.google.com/file/d/1IhIhBU5jQv6dX8Z_ahm99EvWOvxu5BNt/view?usp=sharing
 
 Module List:
     The following are the modules I will be using for my project:
