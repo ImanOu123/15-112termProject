@@ -42,12 +42,9 @@ Structural Plan:
         program will run again.
         3. There will exist a helper function that takes screenshots of each
         section of the webpage - based on coordinates detected in the previous
-        helper function - and store them for future use
-        4. There will exist a helper function that will perform OCT on each
-        section and associate a string of what's in the screenshot with the
-        coordinates of where that section is located. This information will be
-        stored in a dictionary.
-        5. There will exist a helper function that will detect if the mouse
+        helper function - and perform OCR on the image to associate each coord-
+        inate with a string.
+        4. There will exist a helper function that will detect if the mouse
         clicks are within any of those coordinates and perform text-to-speech
         on the strings associated with them.
 
