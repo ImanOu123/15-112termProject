@@ -7,6 +7,7 @@ import cv2
 import pytesseract
 import os
 import basic_graphics
+from cmu_112_graphics import *
 
 # websites to test project on
 #   https://en.wikipedia.org/wiki/Cat
@@ -86,16 +87,32 @@ def mouseClickDetections(coordWStringDict, runListener):
 
 
 def main():
-    # moves mouse to the top left of the page
-    mouse = Controller()
-    mouse.position = (0, 0)
-    tts = gtts.gTTS("The mouse has been moved to the top left of the page")
-    tts.save("mouseMove.mp3")
-    playsound("mouseMove.mp3")
-    os.remove("mouseMove.mp3")
+    def draw(canvas, width, height, message, color):
+        # GUI for application
+
+        def appStarted(app):
+            app.counter = 0
+
+        def keyPressed(app, event):
+            app.counter += 1
+
+        def redrawAll(app, canvas):
+            canvas.create_text(app.width / 2, app.height / 2,
+                               text=f'{app.counter} keypresses',
+                               font='Arial 30 bold')
+
+    runApp(width=400, height=400)
 
     # in order to run the program, the user must press alt
     def on_press(key):
+        # moves mouse to the top left of the page
+        mouse = Controller()
+        mouse.position = (0, 0)
+        tts = gtts.gTTS("The mouse has been moved to the top left of the page")
+        tts.save("mouseMove.mp3")
+        playsound("mouseMove.mp3")
+        os.remove("mouseMove.mp3")
+
         # preliminary variables
         runListener = False
         coordWStringDict = {}

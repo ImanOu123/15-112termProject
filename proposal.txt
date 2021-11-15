@@ -34,7 +34,7 @@ Structural Plan:
         1. The main function will deal with how the program interacts with the
         user, therefore, it will be responsible for how the user can start and
         end the program. It will also feature the calls to the different helper
-        functions.
+        functions. Furthermore, the GUI for the user will be featured here.
         2. There will exist a helper function that splits the webpage into
         different sections by coordinates, through the distinguishing of
         different paragraphs on the webpage and the coordinates of each
