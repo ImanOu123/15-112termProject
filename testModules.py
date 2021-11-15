@@ -82,9 +82,30 @@ from pynput.mouse import Listener
 import cv2
 import pytesseract
 
-
 # extract string from image using OCR
-imageForOCR = cv2.imread('test.jpg')
-custom_config = r'--oem 3 --psm 6'
-ttsString = pytesseract.image_to_string(imageForOCR, config=custom_config)
-print(ttsString)
+# imageForOCR = cv2.imread('test.jpg')
+# custom_config = r'--oem 3 --psm 6'
+# ttsString = pytesseract.image_to_string(imageForOCR, config=custom_config)
+# print(ttsString)
+
+# import the necessary packages
+from pytesseract import Output
+import pytesseract
+import argparse
+import cv2
+
+results = pytesseract.image_to_data("test.jpg", output_type=Output.DICT)
+# loop over each of the individual text localizations
+for i in range(0, len(results["text"])):
+    # extract the bounding box coordinates of the text region from
+    # the current result
+    x = results["left"][i]
+    y = results["top"][i]
+    w = results["width"][i]
+    h = results["height"][i]
+    # extract the OCR text itself along with the confidence of the
+    # text localization
+    text = results["text"][i]
+    conf = int(results["conf"][i])
+
+    print(text, x, y, w, h)

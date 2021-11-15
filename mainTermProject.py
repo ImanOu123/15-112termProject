@@ -9,23 +9,66 @@ import os
 import basic_graphics
 from cmu_112_graphics import *
 
+
 # websites to test project on
 #   https://en.wikipedia.org/wiki/Cat
 #   https://www.thenation.com/left-behind/
 #   need websites with column paragraphs
 
 def distinguishSections(screenWidth, screenHeight):
-    # screenshot of full screen
-    # if scroll detected, new screenshot
-    # divide each section by coordinates
-    # sectionCoord is a list of a set coordinates of top and bottom of each
-    # section
-    # make sure coordinates don't overlap
+    # take a screenshot of the page
+    # use ocr on the page
+    # find new paragraphs based on spaces in string
+    # find locations of first word and word farthest to the left through
+    # text localization
+
+    img = pyautogui.screenshot('fullPgScreenshot.png',
+                               region=(0, 0, screenWidth, screenHeight))
+
+    # convert image from png to jpg so it can be used for the OCR
+    pngToJpg = cv2.imread('fullPgScreenshot.png')
+    cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
+
+    # remove extra files created for screen reading process
+    os.remove('fullPgScreenshot.png')
+
+    # extract string from image using OCR
+    imageForOCR = cv2.imread('fullPgScreenshot.jpg')
+    custom_config = r'--oem 3 --psm 6'
+    ttsString = pytesseract.image_to_string(imageForOCR,
+                                            config=custom_config)
+
+    # UNCOMMENT --> CITE THIS CODE
+
+    # results = pytesseract.image_to_data("fullPgScreenshot.jpg", output_type=Output.DICT)
+    # # loop over each of the individual text localizations
+    # for i in range(0, len(results["text"])):
+    #     # extract the bounding box coordinates of the text region from
+    #     # the current result
+    #     x = results["left"][i]
+    #     y = results["top"][i]
+    #     w = results["width"][i]
+    #     h = results["height"][i]
+    #     # extract the OCR text itself along with the confidence of the
+    #     # text localization
+    #     text = results["text"][i]
+    #     conf = int(results["conf"][i])
+    #
+    #     print(text, x, y, w, h)
+
+    def on_scroll(x, y, button, pressed):
+        pass
+        # if scroll detected take a new screen shot
+
+    with Listener(on_scroll=on_scroll) as listener:
+        listener.join()
+
     sectionCoord = [(0, 0, 10, 10), (20, 20, 30, 30)]
     return sectionCoord
 
 
-def screenshotandOCRSections(sectionCoord):
+def screenshotandOCRSections(sectionCoord):  # remove if OCR text localization
+    # works
     coordWStringsDict = {}
     for coord in sectionCoord:
         # takes a screenshot of section
@@ -87,38 +130,22 @@ def mouseClickDetections(coordWStringDict, runListener):
 
 
 def main():
-    def draw(canvas, width, height, message, color):
-        # GUI for application
-
-        def appStarted(app):
-            app.counter = 0
-
-        def keyPressed(app, event):
-            app.counter += 1
-
-        def redrawAll(app, canvas):
-            canvas.create_text(app.width / 2, app.height / 2,
-                               text=f'{app.counter} keypresses',
-                               font='Arial 30 bold')
-
-    runApp(width=400, height=400)
-
     # in order to run the program, the user must press alt
     def on_press(key):
-        # moves mouse to the top left of the page
-        mouse = Controller()
-        mouse.position = (0, 0)
-        tts = gtts.gTTS("The mouse has been moved to the top left of the page")
-        tts.save("mouseMove.mp3")
-        playsound("mouseMove.mp3")
-        os.remove("mouseMove.mp3")
-
         # preliminary variables
         runListener = False
-        coordWStringDict = {}
+        coordWStringsDict = {}
 
         # when alt key pressed start listening for a mouse press
         if key == keyboard.Key.alt:
+            # moves mouse to the top left of the page
+            mouse = Controller()
+            mouse.position = (0, 0)
+            tts = gtts.gTTS(
+                "The mouse has been moved to the top left of the page")
+            tts.save("mouseMove.mp3")
+            playsound("mouseMove.mp3")
+            os.remove("mouseMove.mp3")
             runListener = True
             # keyboard listening stopped with esc
         elif key == keyboard.Key.esc:
@@ -133,3 +160,51 @@ def main():
     # used to listen for the key presses
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
+
+
+# GUI for application
+
+def appStarted(app):
+    tts = gtts.gTTS("Press the space bar to listen to the instructions")
+    tts.save("startSpeech.mp3")
+    playsound("startSpeech.mp3")
+    os.remove("startSpeech.mp3")
+
+    app.instructions = """This application is a screen reader that helps you 
+                    navigate websites. In order to use this screen reader 
+                    go to the webpage that you want to be read and press alt. 
+                    When you press alt your mouse will be moved to the top left
+                    of the page. In order to stop the program press esc. 
+                    You can now begin to use the screen reader. In order to 
+                    repeat the instructions press space, to leave the instructions 
+                    page press l"""
+
+
+def keyPressed(app, event):
+    # if the user presses space the instructions are read out
+    if event.key == "Space":
+        tts = gtts.gTTS(app.instructions)
+        tts.save("instructionsSpeech.mp3")
+        playsound("instructionsSpeech.mp3")
+        os.remove("instructionsSpeech.mp3")
+
+    if event.key == "l":
+        pass
+        # leave application
+
+
+def redrawAll(app, canvas):
+    canvas.create_text(app.width / 2, app.height / 2, text=
+    """This application is a screen reader that helps you 
+    navigate websites. In order to use this screen reader 
+    go to the webpage that you want to be read and press alt. 
+    When you press alt your mouse will be moved to the top left
+    of the page. In order to stop the program press esc. 
+    You can now begin to use the screen reader. In order to 
+    repeat the instructions press space, to leave the instructions 
+    page press L""")
+
+
+runApp(width=400, height=400)
+
+main()

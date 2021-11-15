@@ -38,13 +38,10 @@ Structural Plan:
         2. There will exist a helper function that splits the webpage into
         different sections by coordinates, through the distinguishing of
         different paragraphs on the webpage and the coordinates of each
-        paragraph. If scrolling is detected this
-        program will run again.
-        3. There will exist a helper function that takes screenshots of each
-        section of the webpage - based on coordinates detected in the previous
-        helper function - and perform OCR on the image to associate each coord-
-        inate with a string.
-        4. There will exist a helper function that will detect if the mouse
+        paragraph. If scrolling is detected this program will run again.
+        This function will create a dictionary of coordinates associated with
+        strings.
+        3. There will exist a helper function that will detect if the mouse
         clicks are within any of those coordinates and perform text-to-speech
         on the strings associated with them.
 
@@ -52,7 +49,15 @@ Algorithmic Plan:
 
     The trickiest part of the project is to: "identify different sections of
     the webpage and the coordinates of each section":
-
+        Through the Tesseract OCR, I will use it's text localization abilities
+        to detect the different sections on the webpage. The following are the
+        steps that I will follow:
+        1. take a screenshot of the page
+        2. use OCR on the page
+        3. find new paragraphs based on spaces in string
+        4. find locations of first word and word farthest to the left through
+        5. extract string for each paragraph and associate it with a coordinate
+           through a dictionary
 
 
 Timeline Plan:
