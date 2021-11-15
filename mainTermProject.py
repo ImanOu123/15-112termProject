@@ -6,7 +6,7 @@ from pynput.mouse import Listener, Controller
 import cv2
 import pytesseract
 import os
-
+import basic_graphics
 
 # websites to test project on
 #   https://en.wikipedia.org/wiki/Cat
