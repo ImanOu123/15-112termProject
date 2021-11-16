@@ -91,10 +91,16 @@ import pytesseract
 # import the necessary packages
 from pytesseract import Output
 import pytesseract
-import argparse
 import cv2
 
-results = pytesseract.image_to_data("test.jpg", output_type=Output.DICT)
+imageForOCR = cv2.imread('sampleFullPageScreenshot.jpg')
+custom_config = r'--oem 3 --psm 6'
+im = pytesseract.image_to_string(imageForOCR, config=custom_config)
+
+results = pytesseract.image_to_data("sampleFullPageScreenshot.jpg",
+                                    output_type=Output.DICT)
+
+lst = []
 # loop over each of the individual text localizations
 for i in range(0, len(results["text"])):
     # extract the bounding box coordinates of the text region from
@@ -108,4 +114,6 @@ for i in range(0, len(results["text"])):
     text = results["text"][i]
     conf = int(results["conf"][i])
 
-    print(text, x, y, w, h)
+    lst.append((text, x, y, w, h))
+
+print(lst)
