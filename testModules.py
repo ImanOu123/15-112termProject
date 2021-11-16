@@ -78,42 +78,45 @@ from pynput.mouse import Listener
 # with Listener(on_click=on_click) as listener:
 #     listener.join()
 
-
 import cv2
 import pytesseract
-
-# extract string from image using OCR
-# imageForOCR = cv2.imread('test.jpg')
-# custom_config = r'--oem 3 --psm 6'
-# ttsString = pytesseract.image_to_string(imageForOCR, config=custom_config)
-# print(ttsString)
-
-# import the necessary packages
 from pytesseract import Output
-import pytesseract
-import cv2
 
-imageForOCR = cv2.imread('sampleFullPageScreenshot.jpg')
-custom_config = r'--oem 3 --psm 6'
-im = pytesseract.image_to_string(imageForOCR, config=custom_config)
+img = cv2.imread('fullPage1.jpg')
+custom_config = r'--oem 3 --psm 1'
+string = pytesseract.image_to_string(img, config=custom_config)
+dict = pytesseract.image_to_data(img, output_type=Output.DICT,
+                                 config=custom_config)
 
-results = pytesseract.image_to_data("sampleFullPageScreenshot.jpg",
-                                    output_type=Output.DICT)
+yCoord = 0
+xCoord = 0
+counter = 0
+xLis = []
+yLis = []
+maxX = 0
+for text, top, left, width, height in zip(dict["text"], dict["top"],
+                                          dict["left"], dict["width"],
+                                          dict["height"]):
+    if text in ["The", "cat", "(Felis", "catus)"]:
+        if counter == 1:
+            yCoord = top
+            xCoord = left
+        counter += 1
 
-lst = []
-# loop over each of the individual text localizations
-for i in range(0, len(results["text"])):
-    # extract the bounding box coordinates of the text region from
-    # the current result
-    x = results["left"][i]
-    y = results["top"][i]
-    w = results["width"][i]
-    h = results["height"][i]
-    # extract the OCR text itself along with the confidence of the
-    # text localization
-    text = results["text"][i]
-    conf = int(results["conf"][i])
-
-    lst.append((text, x, y, w, h))
-
-print(lst)
+    if counter >= 1 and yCoord - 10 < top < yCoord + 10:
+        # img = cv2.rectangle(img, (left, top), (left + width, top + height),
+        #                     (0, 255, 0), 2)
+        xLis.append(left)
+        yLis.append(top)
+        if left == max(xLis):
+            maxX = left + width
+    elif counter >= 1 and xCoord - 10 < left < maxX:
+        # img = cv2.rectangle(img, (left, top), (left + width, top + height),
+        #                     (0, 255, 0), 2)
+        xLis.append(left)
+        yLis.append(top)
+img = cv2.rectangle(img, (min(xLis), min(yLis)), (max(xLis), max(yLis)),
+                    (255, 0, 0), 2)
+print(pytesseract.image_to_string(img, config=custom_config))
+cv2.imshow('img', img)
+cv2.waitKey(0)
