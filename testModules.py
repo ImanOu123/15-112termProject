@@ -82,7 +82,7 @@ import cv2
 import pytesseract
 from pytesseract import Output
 
-img = cv2.imread('fullPage1.jpg')
+img = cv2.imread('sampleImages/fullPage1.jpg')
 custom_config = r'--oem 3 --psm 1'
 string = pytesseract.image_to_string(img, config=custom_config)
 dict = pytesseract.image_to_data(img, output_type=Output.DICT,
