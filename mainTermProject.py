@@ -81,3 +81,4 @@ def distinguishSections(img):
                 minMaxCoord[elem][3] = i[1] + i[3]
 
     return minMaxCoord
+

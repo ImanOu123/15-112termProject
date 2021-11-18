@@ -115,7 +115,7 @@ import cv2
 import pytesseract
 from pytesseract import Output
 
-img = cv2.imread('sampleImages/fullPage1.jpg')
+img = cv2.imread('sampleImages/fullPage3.jpg')
 # perform OCR on screenshot of full page
 custom_config = r'--oem 3 --psm 1'
 string = pytesseract.image_to_string(img, config=custom_config)
@@ -132,16 +132,20 @@ dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
                                      config=custom_config)
 lstWords = list(dataDict["text"])
 
+print(dataDict["text"])
+
 
 def betterIdx(lst, word, num):
     # extracts the nth duplicate's index
     counter = 0
     for i in range(len(lst)):
+        if lst[i] == "Zendure":
+            print(counter, num)
         if lst[i] == word:
             counter += 1
         if counter == num:
             return i
-
+    return len(lst)-1 # FIX THIS AND CHANGE ON MAIN FILE
 
 # split each section with associated indices
 idxDict = {}
@@ -156,6 +160,7 @@ for i in cleanSectionLst:
         # to avoid issues with duplicates
         dupWords[word] = dupWords.get(word, 1) + 1
     idxDict[" ".join(i)] = val
+
 
 # extracts coordinates of each word in section
 coordDict = {}
