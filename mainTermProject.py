@@ -25,9 +25,12 @@ def distinguishSections(img):
     # remove any unnecessary characters
     for i in range(len(cleanSectionLst)):
         if " " in cleanSectionLst[i]:
-            cleanSectionLst[i].remove(" ")
+            cleanSectionLst[i] = list(filter(" ".__ne__, cleanSectionLst[i]))
         if "" in cleanSectionLst[i]:
-            cleanSectionLst[i].remove("")
+            cleanSectionLst[i] = list(filter("".__ne__, cleanSectionLst[i]))
+
+    if [] in cleanSectionLst:
+        cleanSectionLst.remove([])
 
     # extra relevant data about the words on the image - coordinates
     dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,

@@ -115,7 +115,7 @@ import cv2
 import pytesseract
 from pytesseract import Output
 
-img = cv2.imread('sampleImages/fullPage3.jpg')
+img = cv2.imread('sampleImages/fullPage2.jpg')
 # perform OCR on screenshot of full page
 custom_config = r'--oem 3 --psm 1'
 string = pytesseract.image_to_string(img, config=custom_config)
@@ -129,11 +129,15 @@ for i in sectionsLst:
 
 for i in range(len(cleanSectionLst)):
     if " " in cleanSectionLst[i]:
-        cleanSectionLst[i].remove(" ")
+        cleanSectionLst[i] = list(filter(" ".__ne__, cleanSectionLst[i]))
     if "" in cleanSectionLst[i]:
-        cleanSectionLst[i].remove("")
+        cleanSectionLst[i] = list(filter("".__ne__, cleanSectionLst[i]))
+
+if [] in cleanSectionLst:
+    cleanSectionLst.remove([])
 
 
+print(cleanSectionLst)
 # extra relevant data about the words on the image - coordinates
 dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
                                      config=custom_config)
@@ -166,7 +170,7 @@ for i in cleanSectionLst:
         dupWords[word] = dupWords.get(word, 1) + 1
     idxDict[" ".join(i)] = val
 
-print(idxDict)
+
 # extracts coordinates of each word in section
 coordDict = {}
 for key in idxDict:
@@ -175,7 +179,7 @@ for key in idxDict:
         coordDict[key].append([dataDict["left"][val], dataDict["top"][val],
                                dataDict["width"][val], dataDict["height"][val]])
 
-
+print(coordDict)
 # find min and max coord of coordinates of words to get overall coordinates
 # for the whole section
 
