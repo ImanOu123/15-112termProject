@@ -18,7 +18,7 @@ def distinguishSections(img):
     sectionsLst = string.split("\n\n")
     cleanSectionLst = []
 
-    # create a new list of words seperated by section
+    # create a new list of words separated by section
     for i in sectionsLst:
         cleanSectionLst.append(i.replace("\n", " ").split(" "))
 
@@ -93,5 +93,85 @@ def distinguishSections(img):
             if i[1] + i[3] >= minMaxCoord[elem][3]:
                 minMaxCoord[elem][3] = i[1] + i[3]
 
+    # remove extra files created for screen reading process
+    os.remove('fullPgScreenshot.png')
+
     return minMaxCoord
 
+
+
+def mouseClickDetections(stringWCoordDict, runListener):
+    def on_click(x, y, button, pressed):
+        mousePressCoord = [0, 0]
+        # if runListener is False then stop the program
+        if not runListener:
+            return False
+        if pressed:
+            # receive mouse press coordinates
+            mousePressCoord = [x, y]
+        # check if if the mousePress is within any of the predefined sections
+        for string in stringWCoordDict:
+            if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
+                    stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
+                # perform text to speech on extracted string
+                tts = gtts.gTTS(string)
+                tts.save("ttsOnString.mp3")
+                playsound("ttsOnString.mp3")
+
+                # remove extra files created for screen reading process
+                os.remove('ttsOnString.mp3')
+
+    with Listener(on_click=on_click) as listener:
+        listener.join()
+
+
+def userInterface():
+    # in order to run the program, the user must press alt
+    def on_press(key):
+        # preliminary variables
+        runListener = False
+        stringWCoordDict = {}
+
+        # when alt key pressed start listening for a mouse press
+        if key == keyboard.Key.alt:
+            # moves mouse to the top left of the page
+            mouse = Controller()
+            mouse.position = (0, 1080)
+            tts = gtts.gTTS("The mouse has been moved to the bottom left of the page")
+            tts.save("mouseMove.mp3")
+            playsound("mouseMove.mp3")
+            os.remove("mouseMove.mp3")
+            runListener = True
+
+            # takes a screenshot of the current page
+            img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 0, 2560, 1600))
+
+            # convert image from png to jpg so it can be used for the OCR
+            pngToJpg = cv2.imread('fullPgScreenshot.png')
+            cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
+
+            # extract sections of webpage
+            stringWCoordDict = distinguishSections(img)
+
+            # When the page is prepared for TTS
+            tts = gtts.gTTS("You may now begin clicking")
+            tts.save("prepClicking.mp3")
+            playsound("prepClicking.mp3")
+            os.remove("prepClicking.mp3")
+
+            # check whether the mouse clicks are in any sections
+            mouseClickDetections(stringWCoordDict, runListener)
+
+        # keyboard listening stopped with esc
+        elif key == keyboard.Key.esc:
+            runListener = False
+            # stops mouse listener
+            mouseClickDetections(stringWCoordDict, runListener)
+            return False
+
+    # used to listen for the key presses
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
+
+
+userInterface()

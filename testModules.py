@@ -115,7 +115,19 @@ import cv2
 import pytesseract
 from pytesseract import Output
 
-img = cv2.imread('sampleImages/fullPage2.jpg')
+# ENHANCE THE IMAGE FOR OCR - THRESHOLDING
+
+img = cv2.imread('sampleImages/realTimeSample.jpg')
+
+
+# (ZELIC & SABLE, 2021) - https://nanonets.com/blog/ocr-with-tesseract/
+
+# def thresholding(image):
+#     return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+#
+#
+# img = thresholding(img)
+
 # perform OCR on screenshot of full page
 custom_config = r'--oem 3 --psm 1'
 string = pytesseract.image_to_string(img, config=custom_config)
@@ -123,7 +135,7 @@ string = pytesseract.image_to_string(img, config=custom_config)
 sectionsLst = string.split("\n\n")
 cleanSectionLst = []
 
-# create a new list of words seperated by section
+# create a new list of words separated by section
 for i in sectionsLst:
     cleanSectionLst.append(i.replace("\n", " ").split(" "))
 
@@ -135,7 +147,6 @@ for i in range(len(cleanSectionLst)):
 
 if [] in cleanSectionLst:
     cleanSectionLst.remove([])
-
 
 print(cleanSectionLst)
 # extra relevant data about the words on the image - coordinates
@@ -156,6 +167,7 @@ def betterIdx(lst, word, num):
             return i
     return lastIdx
 
+
 # split each section with associated indices
 idxDict = {}
 dupWords = {}
@@ -169,7 +181,6 @@ for i in cleanSectionLst:
         # to avoid issues with duplicates
         dupWords[word] = dupWords.get(word, 1) + 1
     idxDict[" ".join(i)] = val
-
 
 # extracts coordinates of each word in section
 coordDict = {}
@@ -203,7 +214,6 @@ for elem in coordDict:
 for i in minMaxCoord:
     img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
                         (minMaxCoord[i][2], minMaxCoord[i][3]), (255, 0, 0), 2)
-
 
 cv2.imshow('img', img)
 cv2.waitKey(0)

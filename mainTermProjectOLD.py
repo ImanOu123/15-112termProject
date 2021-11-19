@@ -27,20 +27,20 @@ def distinguishSections(screenWidth, screenHeight):
 
     # convert image from png to jpg so it can be used for the OCR
     pngToJpg = cv2.imread('fullPgScreenshot.png')
-    cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
+    cv2.imwrite('realTimeSample.jpg', pngToJpg)
 
     # remove extra files created for screen reading process
     os.remove('fullPgScreenshot.png')
 
     # extract string from image using OCR
-    imageForOCR = cv2.imread('fullPgScreenshot.jpg')
+    imageForOCR = cv2.imread('realTimeSample.jpg')
     custom_config = r'--oem 3 --psm 6'
     ttsString = pytesseract.image_to_string(imageForOCR,
                                             config=custom_config)
 
     # UNCOMMENT --> CITE THIS CODE
 
-    # results = pytesseract.image_to_data("fullPgScreenshot.jpg", output_type=Output.DICT)
+    # results = pytesseract.image_to_data("realTimeSample.jpg", output_type=Output.DICT)
     # # loop over each of the individual text localizations
     # for i in range(0, len(results["text"])):
     #     # extract the bounding box coordinates of the text region from
