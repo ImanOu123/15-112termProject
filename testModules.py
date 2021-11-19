@@ -127,25 +127,30 @@ cleanSectionLst = []
 for i in sectionsLst:
     cleanSectionLst.append(i.replace("\n", " ").split(" "))
 
+for i in range(len(cleanSectionLst)):
+    if " " in cleanSectionLst[i]:
+        cleanSectionLst[i].remove(" ")
+    if "" in cleanSectionLst[i]:
+        cleanSectionLst[i].remove("")
+
+
 # extra relevant data about the words on the image - coordinates
 dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
                                      config=custom_config)
 lstWords = list(dataDict["text"])
 
-print(dataDict["text"])
-
 
 def betterIdx(lst, word, num):
     # extracts the nth duplicate's index
     counter = 0
+    lastIdx = 0
     for i in range(len(lst)):
-        if lst[i] == "Zendure":
-            print(counter, num)
         if lst[i] == word:
             counter += 1
+            lastIdx = i
         if counter == num:
             return i
-    return len(lst)-1 # FIX THIS AND CHANGE ON MAIN FILE
+    return lastIdx
 
 # split each section with associated indices
 idxDict = {}
@@ -161,7 +166,7 @@ for i in cleanSectionLst:
         dupWords[word] = dupWords.get(word, 1) + 1
     idxDict[" ".join(i)] = val
 
-
+print(idxDict)
 # extracts coordinates of each word in section
 coordDict = {}
 for key in idxDict:
@@ -169,6 +174,7 @@ for key in idxDict:
     for val in idxDict[key]:
         coordDict[key].append([dataDict["left"][val], dataDict["top"][val],
                                dataDict["width"][val], dataDict["height"][val]])
+
 
 # find min and max coord of coordinates of words to get overall coordinates
 # for the whole section
@@ -193,7 +199,6 @@ for elem in coordDict:
 for i in minMaxCoord:
     img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
                         (minMaxCoord[i][2], minMaxCoord[i][3]), (255, 0, 0), 2)
-
 
 
 cv2.imshow('img', img)
