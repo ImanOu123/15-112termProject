@@ -115,20 +115,11 @@ import cv2
 import pytesseract
 from pytesseract import Output
 
-# ENHANCE THE IMAGE FOR OCR - THRESHOLDING
 
-img = cv2.imread('sampleImages/realTimeSample.jpg')
+img = cv2.imread('sampleImages/fullPage1.jpg', cv2.IMREAD_GRAYSCALE)
 
+# thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
-# (ZELIC & SABLE, 2021) - https://nanonets.com/blog/ocr-with-tesseract/
-
-# def thresholding(image):
-#     return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-#
-#
-# img = thresholding(img)
-
-# perform OCR on screenshot of full page
 custom_config = r'--oem 3 --psm 1'
 string = pytesseract.image_to_string(img, config=custom_config)
 
@@ -148,7 +139,7 @@ for i in range(len(cleanSectionLst)):
 if [] in cleanSectionLst:
     cleanSectionLst.remove([])
 
-print(cleanSectionLst)
+
 # extra relevant data about the words on the image - coordinates
 dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
                                      config=custom_config)
@@ -190,7 +181,7 @@ for key in idxDict:
         coordDict[key].append([dataDict["left"][val], dataDict["top"][val],
                                dataDict["width"][val], dataDict["height"][val]])
 
-print(coordDict)
+
 # find min and max coord of coordinates of words to get overall coordinates
 # for the whole section
 
@@ -211,9 +202,16 @@ for elem in coordDict:
 
         if i[1] + i[3] >= minMaxCoord[elem][3]:
             minMaxCoord[elem][3] = i[1] + i[3]
-for i in minMaxCoord:
-    img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
-                        (minMaxCoord[i][2], minMaxCoord[i][3]), (255, 0, 0), 2)
+for text in minMaxCoord:
+    sectionSize = minMaxCoord[text][2]*minMaxCoord[text][3]
+    if sectionSize < 10000:
+        img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
+                                (minMaxCoord[i][2], minMaxCoord[i][3]), (255, 0, 0), 2)
 
-cv2.imshow('img', img)
-cv2.waitKey(0)
+# for i in minMaxCoord:
+#     img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
+#                         (minMaxCoord[i][2], minMaxCoord[i][3]), (0, 0, 0), 2)
+#
+# cv2.imshow('img', img)
+# cv2.waitKey(0)
+

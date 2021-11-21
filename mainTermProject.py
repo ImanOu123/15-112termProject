@@ -2,7 +2,8 @@ import gtts
 from playsound import playsound
 import pyautogui
 from pynput import keyboard
-from pynput.mouse import Listener, Controller
+from pynput import mouse
+from pynput.mouse import Controller
 import cv2
 import pytesseract
 import os
@@ -99,39 +100,9 @@ def distinguishSections(img):
     return minMaxCoord
 
 
-
-def mouseClickDetections(stringWCoordDict, runListener):
-    def on_click(x, y, button, pressed):
-        mousePressCoord = [0, 0]
-        # if runListener is False then stop the program
-        if not runListener:
-            return False
-        if pressed:
-            # receive mouse press coordinates
-            mousePressCoord = [x, y]
-        # check if if the mousePress is within any of the predefined sections
-        for string in stringWCoordDict:
-            if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
-                    stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
-                # perform text to speech on extracted string
-                tts = gtts.gTTS(string)
-                tts.save("ttsOnString.mp3")
-                playsound("ttsOnString.mp3")
-
-                # remove extra files created for screen reading process
-                os.remove('ttsOnString.mp3')
-
-    with Listener(on_click=on_click) as listener:
-        listener.join()
-
-
-def userInterface():
+def mouseClickDetections():
     # in order to run the program, the user must press alt
     def on_press(key):
-        # preliminary variables
-        runListener = False
-        stringWCoordDict = {}
-
         # when alt key pressed start listening for a mouse press
         if key == keyboard.Key.alt:
             # moves mouse to the top left of the page
@@ -141,17 +112,17 @@ def userInterface():
             tts.save("mouseMove.mp3")
             playsound("mouseMove.mp3")
             os.remove("mouseMove.mp3")
-            runListener = True
 
-            # takes a screenshot of the current page
-            img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 0, 2560, 1600))
+            # takes a screenshot of the current page - region doesn't include address bar -
+            # may need to adjust to fit screen
+            img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
 
-            # convert image from png to jpg so it can be used for the OCR
-            pngToJpg = cv2.imread('fullPgScreenshot.png')
+            # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
+            pngToJpg = cv2.imread('fullPgScreenshot.png', cv2.IMREAD_GRAYSCALE)
             cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
 
             # extract sections of webpage
-            stringWCoordDict = distinguishSections(img)
+            on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
 
             # When the page is prepared for TTS
             tts = gtts.gTTS("You may now begin clicking")
@@ -159,19 +130,48 @@ def userInterface():
             playsound("prepClicking.mp3")
             os.remove("prepClicking.mp3")
 
-            # check whether the mouse clicks are in any sections
-            mouseClickDetections(stringWCoordDict, runListener)
-
-        # keyboard listening stopped with esc
         elif key == keyboard.Key.esc:
-            runListener = False
-            # stops mouse listener
-            mouseClickDetections(stringWCoordDict, runListener)
+            tts = gtts.gTTS("Goodbye. Thank for using the screen reader.")
+            tts.save("goodBye.mp3")
+            playsound("goodBye.mp3")
+            os.remove("goodBye.mp3")
+            # remove extra files
+            os.remove("fullPgScreenshot.jpg")
+            # Stop mouse and keyboard listeners
+            mListener.stop()
             return False
 
-    # used to listen for the key presses
-    with keyboard.Listener(on_press=on_press) as listener:
-        listener.join()
+    def on_click(x, y, button, pressed):
+        mousePressCoord = [0, 0]
+        try:
+            stringWCoordDict = on_press.stringWCoordDict
+        except:
+            stringWCoordDict = {}
+
+        if pressed:
+            # receive mouse press coordinates
+            mousePressCoord = [x, y - 100]
+
+        # check if if the mousePress is within any of the predefined sections
+        for string in stringWCoordDict:
+            if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
+                    stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
+                # perform text to speech on extracted string
+                tts = gtts.gTTS(string)
+                tts.save("ttsOnString.mp3")
+                playsound("ttsOnString.mp3")
+
+                # remove extra files created for screen readin-g process
+                os.remove('ttsOnString.mp3')
+
+    # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
+    with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click) as mListener:
+        kListener.join()
+        mListener.join()
+
+
+def userInterface():
+    mouseClickDetections()
 
 
 userInterface()
