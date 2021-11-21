@@ -6,7 +6,6 @@ from pynput import mouse
 from pynput.mouse import Controller
 import cv2
 import pytesseract
-import os
 from cmu_112_graphics import *
 from pytesseract import Output
 
@@ -97,7 +96,58 @@ def distinguishSections(img):
     # remove extra files created for screen reading process
     os.remove('fullPgScreenshot.png')
 
-    return minMaxCoord
+    # combine smaller sections into bigger sections to make clicking easier
+
+    smallSections = []
+
+    # find small sections based on section size
+    for text in minMaxCoord:
+        sectionSize = abs(minMaxCoord[text][2] - minMaxCoord[text][0]) * abs(
+            minMaxCoord[text][3] - minMaxCoord[text][1])
+        if sectionSize < 20000:
+            smallSections.append(text)
+
+    combinedTexts = []
+    newMinMaxCoord = {}
+
+    # helper function to combine the texts in the sections and their coordinates
+    def combineSections(minMaxDict, text1, text2):
+        combineText = text1 + " " + text2
+        combineCoord = [min(minMaxDict[text1][0], minMaxDict[text2][0]),
+                        min(minMaxDict[text1][1], minMaxDict[text2][1]),
+                        max(minMaxDict[text1][2], minMaxDict[text2][2]),
+                        max(minMaxDict[text1][3], minMaxDict[text2][3])]
+        return combineText, combineCoord
+
+    # for each small sections find small section next to it
+
+    for text in smallSections:
+        topX = minMaxCoord[text][0]
+        topY = minMaxCoord[text][1]
+        botX = minMaxCoord[text][2]
+        botY = minMaxCoord[text][3]
+        marginY = 20
+        marginX = 40
+        if text not in combinedTexts:
+            remainList = smallSections[:smallSections.index(text)] + smallSections[smallSections.index(text) + 1:]
+            for elem in remainList:
+                if elem not in combinedTexts:
+                    # if small sections detected close to it combine the two sections
+                    if (topY - marginY < minMaxCoord[elem][3] < topY or botY < minMaxCoord[elem][
+                        1] < botY + marginY) and \
+                            (topX - marginX < minMaxCoord[elem][0] < topX or botX < minMaxCoord[elem][
+                                2] < botX + marginX):
+                        newText, newCoord = combineSections(minMaxCoord, text, elem)
+                        combinedTexts += [text, elem]
+                        # create a new dictionary with the bigger sections
+                        newMinMaxCoord[newText] = newCoord
+
+    # for small sections that weren't combined and sections that weren't small, add to new dictionary
+    for i in minMaxCoord:
+        if i not in smallSections or (i in smallSections and i not in combinedTexts):
+            newMinMaxCoord[i] = [minMaxCoord[i][0], minMaxCoord[i][1], minMaxCoord[i][2], minMaxCoord[i][3]]
+
+    return newMinMaxCoord
 
 
 def mouseClickDetections():
@@ -130,8 +180,11 @@ def mouseClickDetections():
             playsound("prepClicking.mp3")
             os.remove("prepClicking.mp3")
 
+            # page change variable, won't read any text until Alt is pressed again
+            on_press.pgChange = False
+
         elif key == keyboard.Key.esc:
-            tts = gtts.gTTS("Goodbye. Thank for using the screen reader.")
+            tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.")
             tts.save("goodBye.mp3")
             playsound("goodBye.mp3")
             os.remove("goodBye.mp3")
@@ -152,19 +205,51 @@ def mouseClickDetections():
             # receive mouse press coordinates
             mousePressCoord = [x, y - 100]
 
-        # check if if the mousePress is within any of the predefined sections
-        for string in stringWCoordDict:
-            if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
-                    stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
-                # perform text to speech on extracted string
-                tts = gtts.gTTS(string)
-                tts.save("ttsOnString.mp3")
-                playsound("ttsOnString.mp3")
+            # take a screenshot to compare with original screenshot to check if hyperlink was pressed
+            im = pyautogui.screenshot('comparePgScreenshot.png', region=(0, 100, 1440, 900))
 
-                # remove extra files created for screen readin-g process
-                os.remove('ttsOnString.mp3')
+            # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
+            pngToJpg = cv2.imread('comparePgScreenshot.png', cv2.IMREAD_GRAYSCALE)
+            cv2.imwrite('comparePgScreenshot.jpg', pngToJpg)
+
+            # check if two screenshots are the same - (abhi, StackOverFlow, 2020)
+            # https://stackoverflow.com/questions/1927660/compare-two-images-the-python-linux-way
+            with open('fullPgScreenshot.jpg', 'rb') as f:
+                content1 = f.read()
+            with open('comparePgScreenshot.jpg', 'rb') as f:
+                content2 = f.read()
+            if content1 != content2:
+                # perform text to speech on string
+                tts = gtts.gTTS("You have activated a hyperlink, press Alt to use the screen reader on the changed"
+                                "page")
+                tts.save("ttsPgChange.mp3")
+                playsound("ttsPgChange.mp3")
+
+                # remove extra files created for screen reading process
+                os.remove('ttsPgChange.mp3')
+                on_press.pgChange = True
+
+            # remove unnecessary files
+            os.remove('comparePgScreenshot.jpg')
+            os.remove('comparePgScreenshot.png')
+
+        # check if page hasn't been changed with last click
+        if not on_press.pgChange:
+            # check if if the mousePress is within any of the predefined sections
+            for string in stringWCoordDict:
+                if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
+                        stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
+                    # perform text to speech on extracted string
+                    tts = gtts.gTTS(string)
+                    tts.save("ttsOnString.mp3")
+                    playsound("ttsOnString.mp3")
+
+                    # remove extra files created for screen reading process
+                    os.remove('ttsOnString.mp3')
+            pgChange = False
 
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
+    # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python
     with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click) as mListener:
         kListener.join()
         mListener.join()
