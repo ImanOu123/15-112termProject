@@ -13,7 +13,7 @@ from pytesseract import Output
 def distinguishSectionsAr(img):
     # perform OCR on screenshot of full page
     custom_config = r'--oem 3 --psm 1'
-    string = pytesseract.image_to_string(img, config=custom_config)
+    string = pytesseract.image_to_string(img, config=custom_config, lang="ara")
 
     sectionsLst = string.split("\n\n")
     cleanSectionLst = []
@@ -34,7 +34,7 @@ def distinguishSectionsAr(img):
 
     # extra relevant data about the words on the image - coordinates
     dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
-                                         config=custom_config)
+                                         config=custom_config, lang="ara")
     lstWords = list(dataDict["text"])
 
     def betterIdx(lst, word, num):

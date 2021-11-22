@@ -263,13 +263,119 @@ from pynput.mouse import Listener
 # else:
 #     print("not same")
 
-from pynput import keyboard
+# from pynput import keyboard
+#
+#
+# def on_press(key):
+#     print(key)
+#
+#
+# with keyboard.Listener(
+#         on_press=on_press) as listener:
+#     listener.join()
+
+# import cv2
+# import pytesseract
+# from pytesseract import Output
+#
+# img = cv2.imread('sampleImages/ArPageTest.jpg', cv2.IMREAD_GRAYSCALE)
+#
+# custom_config = r'--oem 3 --psm 1'
+# string = pytesseract.image_to_string(img, config=custom_config, lang="ara")
+# dataDict = pytesseract.image_to_data(img, output_type=Output.DICT, config=custom_config, lang="ara")
+# print(dataDict["text"])
+
+import cv2
+import pytesseract
+from pytesseract import Output
+
+img = cv2.imread('sampleImages/ArPageTest.jpg', cv2.IMREAD_GRAYSCALE)
+
+custom_config = r'--oem 3 --psm 1'
+string = pytesseract.image_to_string(img, config=custom_config, lang="ara")
+
+sectionsLst = string.split("\n\n")
+cleanSectionLst = []
+
+# create a new list of words separated by section
+for i in sectionsLst:
+    cleanSectionLst.append(i.replace("\n", " ").split(" "))
+
+for i in range(len(cleanSectionLst)):
+    if " " in cleanSectionLst[i]:
+        cleanSectionLst[i] = list(filter(" ".__ne__, cleanSectionLst[i]))
+    if "" in cleanSectionLst[i]:
+        cleanSectionLst[i] = list(filter("".__ne__, cleanSectionLst[i]))
+
+if [] in cleanSectionLst:
+    cleanSectionLst.remove([])
+
+# extra relevant data about the words on the image - coordinates
+dataDict = pytesseract.image_to_data(img, output_type=Output.DICT, config=custom_config, lang="ara")
+
+lstWords = list(dataDict["text"])
 
 
-def on_press(key):
-    print(key)
+def betterIdx(lst, word, num):
+    # extracts the nth duplicate's index
+    counter = 0
+    lastIdx = 0
+    for i in range(len(lst)):
+        if lst[i] == word:
+            counter += 1
+            lastIdx = i
+        if counter == num:
+            return i
+    return lastIdx
 
 
-with keyboard.Listener(
-        on_press=on_press) as listener:
-    listener.join()
+# split each section with associated indices
+idxDict = {}
+dupWords = {}
+
+# links each section to the indices of the words in that section
+for i in cleanSectionLst:
+    val = []
+    for word in i:
+        if word in lstWords:
+            val.append(betterIdx(lstWords, word, dupWords.get(word, 1)))
+        # to avoid issues with duplicates
+        dupWords[word] = dupWords.get(word, 1) + 1
+    idxDict[" ".join(i)] = val
+
+# extracts coordinates of each word in section
+coordDict = {}
+for key in idxDict:
+    coordDict[key] = []
+    for val in idxDict[key]:
+        coordDict[key].append([dataDict["left"][val], dataDict["top"][val],
+                               dataDict["width"][val], dataDict["height"][val]])
+
+# find min and max coord of coordinates of words to get overall coordinates
+# for the whole section
+
+minMaxCoord = {}
+
+for elem in coordDict:
+    minMaxCoord[elem] = [99999, 99999, 0, 0]
+    for i in coordDict[elem]:
+        # print(i[0], i[1], minMaxCoord[elem])
+        if i[0] <= minMaxCoord[elem][0]:
+            minMaxCoord[elem][0] = i[0]
+
+        if i[0] + i[2] >= minMaxCoord[elem][2]:
+            minMaxCoord[elem][2] = i[0] + i[2]
+
+        if i[1] <= minMaxCoord[elem][1]:
+            minMaxCoord[elem][1] = i[1]
+
+        if i[1] + i[3] >= minMaxCoord[elem][3]:
+            minMaxCoord[elem][3] = i[1] + i[3]
+
+
+for i in minMaxCoord:
+    img = cv2.rectangle(img, (minMaxCoord[i][0], minMaxCoord[i][1]),
+                        (minMaxCoord[i][2], minMaxCoord[i][3]), (0, 0, 0), 2)
+
+cv2.imshow('img', img)
+cv2.waitKey(0)

@@ -265,15 +265,17 @@ def userInterface():
                     navigate websites. In order to use this screen reader
                     go to the webpage that you want to be read and press alt.
                     When you press alt your mouse will be moved to the bottom left
-                    of the page. In order to stop the program press esc.
+                    of the page. In order to stop the program press Escape.
                     You can now begin to use the screen reader. In order to
-                    repeat the instructions press space. To repeat the instructions in arabic press A. 
+                    repeat the instructions in English press the spacebar. To repeat the instructions in arabic press A.
                     To leave the instructions press L"""
 
-    instructionsAr = "هذا التطبيق عبارة عن قارئ شاشة يساعدك على تصفح مواقع الويب. لاستخدام قارئ الشاشة هذا" \
-                     " ، انتقل إلى صفحة الويب التي تريد قراءتها واضغط على مفتاح بديل. عند الضغط على مفتاح بديل ، سيتم تحريك الماوس" \
-                     " إلى أسفل يسار الصفحة. لإيقاف البرنامج اضغط esc. يمكنك الآن البدء في استخدام قارئ الشاشة. من أجل تكرار" \
-                     " التعليمات اضغط على الفضاء. لتكرار التعليمات باللغة العربية اضغط على A. لترك التعليمات اضغط على L"
+    instructionsAr = "هذا التطبيق عبارة" \
+                     " عن قارئ" \
+                     " شاشة يساعدك على تصفح مواقع الويب. لاستخدام قارئ الشاشة هذا ، انتقل إلى صفحة الويب التي تريد" \
+                     " قراءتها واضغط على مفتاح alt ، وعند الضغط على مفتاح بديل ، سيتم نقل الماوس إلى أسفل يسار الصفحة" \
+                     ". لإيقاف البرنامج اضغط Escape. يمكنك الآن البدء في استخدام قارئ الشاشة. لتكرار التعليمات باللغة" \
+                     " الإنجليزية اضغط على مفتاح المسافة. لتكرار التعليمات بالعربية اضغط أ. لترك التعليمات اضغط على L."
 
     def on_press(key):
         if key == keyboard.Key.space:
@@ -283,7 +285,7 @@ def userInterface():
             os.remove("instructionsSpeech.mp3")
         # if L pressed, close instructions
         elif key.char == "a":
-            tts = gtts.gTTS(instructionsAr)
+            tts = gtts.gTTS(instructionsAr, lang="ar")
             tts.save("instructionsArSpeech.mp3")
             playsound("instructionsArSpeech.mp3")
             os.remove("instructionsArSpeech.mp3")
@@ -298,3 +300,4 @@ def userInterface():
 
 
 userInterface()
+
