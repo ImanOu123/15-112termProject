@@ -12,7 +12,6 @@ from mainTermProjectArabicVer import *
 
 
 def distinguishSections(img):
-
     # perform OCR on screenshot of full page
 
     custom_config = r'--oem 3 --psm 1'
@@ -170,7 +169,6 @@ def distinguishSections(img):
 
 
 def mouseClickDetections():
-
     # in order to run the program, the user must press alt
 
     def on_press(key):
@@ -240,7 +238,7 @@ def mouseClickDetections():
 
         mousePressCoord = [0, 0]
         try:
-            stringWCoordDict = on_press.stringWCoordDic
+            stringWCoordDict = on_press.stringWCoordDict
         except:
             stringWCoordDict = {}
 
@@ -254,10 +252,9 @@ def mouseClickDetections():
 
             # checks if page screen shot has been previously made to avoid any bugs and errors with clicking
 
+            # take a screenshot to compare with original screenshot to check if hyperlink was pressed
+
             if os.path.isfile('fullPgScreenshot.jpg'):
-
-                # take a screenshot to compare with original screenshot to check if hyperlink was pressed
-
                 im = pyautogui.screenshot('comparePgScreenshot.png', region=(0, 100, 1440, 900))
 
                 # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
@@ -277,7 +274,6 @@ def mouseClickDetections():
                 # or scrolled
 
                 if content1 != content2:
-
                     # perform text to speech on string
 
                     tts = gtts.gTTS("You have activated a hyperlink or have scrolled, press Alt to use the screen "
@@ -299,14 +295,13 @@ def mouseClickDetections():
         # check if page hasn't been changed with last click
 
         if not on_press.pgChange:
-
             # check if if the mousePress is within any of the predefined sections
 
             for string in stringWCoordDict:
                 if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
                         stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
-
                     # perform text to speech on extracted string
+                    print("hello")
 
                     tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
                     tts.save("ttsOnString.mp3")
@@ -316,7 +311,8 @@ def mouseClickDetections():
 
                     os.remove('ttsOnString.mp3')
 
-            pgChange = False
+            on_press.pgChange = False
+
 
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
     # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python
