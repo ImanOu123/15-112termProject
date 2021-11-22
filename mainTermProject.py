@@ -50,7 +50,9 @@ def distinguishSections(img):
     # helper function to help extract index of duplicated words
 
     def betterIdx(lst, word, num):
+
         # extracts the nth duplicate's index
+
         counter = 0
         lastIdx = 0
         for i in range(len(lst)):
@@ -222,10 +224,13 @@ def mouseClickDetections():
             tts.save("goodBye.mp3")
             playsound("goodBye.mp3")
             os.remove("goodBye.mp3")
+
             # remove extra files
+
             os.remove("fullPgScreenshot.jpg")
 
             # Stop mouse and keyboard listeners
+
             mListener.stop()
             return False
 
