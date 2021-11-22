@@ -10,6 +10,7 @@ from cmu_112_graphics import *
 from pytesseract import Output
 from mainTermProjectArabicVer import *
 
+# GITHUB REPO - https://github.com/ImanOu123/15-112termProject
 
 def distinguishSections(img):
     # perform OCR on screenshot of full page
