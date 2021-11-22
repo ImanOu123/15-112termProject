@@ -88,3 +88,14 @@ Module List:
         openCV
         pytesseract
         os
+
+TP2 Update:
+    The following are the updates I have made to my code for TP2:
+        1. The image is made black and white to increase accuracy with OCR
+        2. The smaller sections that were detected by the OCR, were manually made into bigger sections to increase
+        accessibility
+        3. The OCR detects changes with the page such as scrolling or pressing a hyperlink
+        4. The user interface has been updated to only include sound. In the user interface, the accent of the speaker
+        in the tts can be changed and an arabic version of the OCR can be accessed.
+        5. An arabic version of the program has been created in which the instructions are in arabic and the OCR
+        reads arabic text
