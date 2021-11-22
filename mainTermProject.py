@@ -159,7 +159,8 @@ def mouseClickDetections():
             # moves mouse to the top left of the page
             mouse = Controller()
             mouse.position = (0, 1080)
-            tts = gtts.gTTS("The mouse has been moved to the bottom left of the page")
+            tts = gtts.gTTS("The mouse has been moved to the bottom left of the page", lang=userInterface.lang,
+                            tld=userInterface.tld)
             tts.save("mouseMove.mp3")
             playsound("mouseMove.mp3")
             os.remove("mouseMove.mp3")
@@ -176,7 +177,8 @@ def mouseClickDetections():
             on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
 
             # When the page is prepared for TTS
-            tts = gtts.gTTS("You may now begin clicking")
+            tts = gtts.gTTS("You may now begin clicking", lang=userInterface.lang,
+                            tld=userInterface.tld)
             tts.save("prepClicking.mp3")
             playsound("prepClicking.mp3")
             os.remove("prepClicking.mp3")
@@ -185,7 +187,8 @@ def mouseClickDetections():
             on_press.pgChange = False
 
         elif key == keyboard.Key.esc:
-            tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.")
+            tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.", lang=userInterface.lang,
+                            tld=userInterface.tld)
             tts.save("goodBye.mp3")
             playsound("goodBye.mp3")
             os.remove("goodBye.mp3")
@@ -222,7 +225,8 @@ def mouseClickDetections():
             if content1 != content2:
                 # perform text to speech on string
                 tts = gtts.gTTS("You have activated a hyperlink or have scrolled, press Alt to use the screen "
-                                "reader on the changed page")
+                                "reader on the changed page", lang=userInterface.lang,
+                                tld=userInterface.tld)
                 tts.save("ttsPgChange.mp3")
                 playsound("ttsPgChange.mp3")
 
@@ -241,7 +245,7 @@ def mouseClickDetections():
                 if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
                         stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
                     # perform text to speech on extracted string
-                    tts = gtts.gTTS(string)
+                    tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
                     tts.save("ttsOnString.mp3")
                     playsound("ttsOnString.mp3")
 
@@ -257,8 +261,18 @@ def mouseClickDetections():
 
 
 def userInterface():
+    # default accent for TTs
+
+    userInterface.accent = "American"
+    userInterface.accentIdx = 0
+    userInterface.lang = "en"
+    userInterface.tld = "com"
+
+    # starter for running code
+
     userInterface.screenReaderLanguage = "Eng"
-    tts = gtts.gTTS("Press the space bar to listen to the instructions")
+    tts = gtts.gTTS("Press the space bar to listen to the instructions", lang=userInterface.lang,
+                    tld=userInterface.tld)
     tts.save("startSpeech.mp3")
     playsound("startSpeech.mp3")
     os.remove("startSpeech.mp3")
@@ -268,9 +282,9 @@ def userInterface():
                     go to the webpage that you want to be read and press alt.
                     When you press alt your mouse will be moved to the bottom left
                     of the page. In order to stop the program press Escape.
-                    You can now begin to use the screen reader. In order to
+                    You can now begin to use the screen reader. To change the dialect press D. In order to
                     repeat the instructions in English press the spacebar. To repeat the instructions in arabic press A.
-                    To leave the instructions press L"""
+                    To leave the instructions press L."""
 
     instructionsAr = "هذا التطبيق عبارة" \
                      " عن قارئ" \
@@ -280,32 +294,137 @@ def userInterface():
                      " الإنجليزية اضغط على مفتاح المسافة. لتكرار التعليمات بالعربية اضغط أ. لترك التعليمات اضغط على L."
 
     def on_press(key):
-        if key == keyboard.Key.space:
-            tts = gtts.gTTS(instructions)
-            tts.save("instructionsSpeech.mp3")
-            playsound("instructionsSpeech.mp3")
-            os.remove("instructionsSpeech.mp3")
+        try:
+            # if D is pressed, accent can be
+            if key.char == "d":
 
-            # if the last spoken instruction was in English do OCR in English
+                # instructions to select an accent for screen reader
 
-            userInterface.screenReaderLanguage = "Eng"
+                selectingAccentInstructions = """In order to select an accent press the up button. When you have found the 
+                                                    accent you want to use for your screen reader, press enter and you can begin 
+                                                    using the screen reader"""
 
-        # if L pressed, close instructions
-        elif key.char == "a":
-            tts = gtts.gTTS(instructionsAr, lang="ar")
-            tts.save("instructionsArSpeech.mp3")
-            playsound("instructionsArSpeech.mp3")
-            os.remove("instructionsArSpeech.mp3")
+                tts = gtts.gTTS(selectingAccentInstructions, lang=userInterface.lang,
+                                tld=userInterface.tld)
 
-            # if the last spoken instruction was in Arabic do OCR in Arabic
+                tts.save("selectingAccentInstructions.mp3")
+                playsound("selectingAccentInstructions.mp3")
+                os.remove("selectingAccentInstructions.mp3")
 
-            userInterface.screenReaderLanguage = "Ar"
+            elif key.char == "a":
 
-        elif key.char == "l":
-            return False
+                # instructions in arabic
+
+                tts = gtts.gTTS(instructionsAr, lang="ar")
+                tts.save("instructionsArSpeech.mp3")
+                playsound("instructionsArSpeech.mp3")
+                os.remove("instructionsArSpeech.mp3")
+
+                # if the last spoken instruction was in Arabic do OCR in Arabic
+
+                userInterface.screenReaderLanguage = "Ar"
+
+            elif key.char == "l":
+                tts = gtts.gTTS("Remember to press Alt when you are ready", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("leaveMessage.mp3")
+                playsound("leaveMessage.mp3")
+                os.remove("leaveMessage.mp3")
+                return False
+
+        except AttributeError:
+
+            if key == keyboard.Key.space:
+                tts = gtts.gTTS(instructions, lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("instructionsSpeech.mp3")
+                playsound("instructionsSpeech.mp3")
+                os.remove("instructionsSpeech.mp3")
+
+                # if the last spoken instruction was in English do OCR in English
+
+                userInterface.screenReaderLanguage = "Eng"
+
+            elif key == keyboard.Key.enter:
+
+                # closing statement before instructions is closed
+
+                tts = gtts.gTTS("Remember to press Alt when you are ready", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("leaveMessage.mp3")
+                playsound("leaveMessage.mp3")
+                os.remove("leaveMessage.mp3")
+
+                # when enter is clicked, accent is selected and keyboard listener stops
+                return False
+
+            elif key == keyboard.Key.up:
+
+                # options for the accent
+                accentOptions = ["American", "Australian", "British", "Indian", "French", "Spanish"]
+                userInterface.accent = accentOptions[userInterface.accentIdx % len(accentOptions)]
+
+                if userInterface.accent == "American":
+                    userInterface.lang = "en"
+                    userInterface.tld = "com"
+                    tts = gtts.gTTS("American", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                elif userInterface.accent == "Australian":
+                    userInterface.lang = "en"
+                    userInterface.tld = "com.au"
+                    tts = gtts.gTTS("Australian", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                elif userInterface.accent == "British":
+                    userInterface.lang = "en"
+                    userInterface.tld = "co.uk"
+                    tts = gtts.gTTS("British", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                elif userInterface.accent == "Indian":
+                    userInterface.lang = "en"
+                    userInterface.tld = "co.in"
+                    tts = gtts.gTTS("Indian", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                elif userInterface.accent == "Spanish":
+                    userInterface.lang = "es"
+                    userInterface.tld = "es"
+                    tts = gtts.gTTS("Spanish", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                elif userInterface.accent == "French":
+                    userInterface.lang = "fr"
+                    userInterface.tld = "fr"
+                    tts = gtts.gTTS("French", lang=userInterface.lang,
+                                    tld=userInterface.tld)
+                    tts.save("accentChange.mp3")
+                    playsound("accentChange.mp3")
+                    os.remove("accentChange.mp3")
+
+                # selection changes everytime up is pressed
+                userInterface.accentIdx += 1
 
     with keyboard.Listener(on_press=on_press) as kListener:
         kListener.join()
+
+    # Depending on the last language instructions were spoken in the screen reader will perform OCR in that language
 
     if userInterface.screenReaderLanguage == "Eng":
         mouseClickDetections()

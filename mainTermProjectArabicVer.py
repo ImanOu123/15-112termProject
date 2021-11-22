@@ -13,6 +13,8 @@ from pytesseract import Output
 def distinguishSectionsAr(img):
     # perform OCR on screenshot of full page
     custom_config = r'--oem 3 --psm 1'
+
+    # reads arabic text for OCR
     string = pytesseract.image_to_string(img, config=custom_config, lang="ara")
 
     sectionsLst = string.split("\n\n")
@@ -33,6 +35,7 @@ def distinguishSectionsAr(img):
         cleanSectionLst.remove([])
 
     # extra relevant data about the words on the image - coordinates
+    # gathers the data for arabic text
     dataDict = pytesseract.image_to_data(img, output_type=Output.DICT,
                                          config=custom_config, lang="ara")
     lstWords = list(dataDict["text"])
@@ -158,7 +161,10 @@ def mouseClickDetectionsAr():
             # moves mouse to the top left of the page
             mouse = Controller()
             mouse.position = (0, 1080)
+
+            # instructions are in arabic
             mouseMoveStr = "تم نقل الماوس إلى أسفل يسار الصفحة"
+
             tts = gtts.gTTS(mouseMoveStr, lang="ar")
             tts.save("mouseMove.mp3")
             playsound("mouseMove.mp3")
@@ -176,7 +182,9 @@ def mouseClickDetectionsAr():
             on_press.stringWCoordDict = distinguishSectionsAr('fullPgScreenshot.jpg')
 
             # When the page is prepared for TTS
+            # instructions are in arabic
             prepClicking = "يمكنك الآن البدء في النقر فوق"
+
             tts = gtts.gTTS(prepClicking, lang="ar")
             tts.save("prepClicking.mp3")
             playsound("prepClicking.mp3")
@@ -186,7 +194,10 @@ def mouseClickDetectionsAr():
             on_press.pgChange = False
 
         elif key == keyboard.Key.esc:
+
+            # instructions are in arabic
             goodByeStr = "مع السلامة. شكرا لك على استخدام قارئ الشاشة."
+
             tts = gtts.gTTS(goodByeStr, lang="ar")
             tts.save("goodBye.mp3")
             playsound("goodBye.mp3")
@@ -222,9 +233,12 @@ def mouseClickDetectionsAr():
             with open('comparePgScreenshot.jpg', 'rb') as f:
                 content2 = f.read()
             if content1 != content2:
+
                 # perform text to speech on string
+                # instructions are in arabic
                 pgChangeStr = "لقد قمت بتنشيط ارتباط" \
                               " تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
+
                 tts = gtts.gTTS(pgChangeStr, lang="ar")
                 tts.save("ttsPgChange.mp3")
                 playsound("ttsPgChange.mp3")
@@ -258,6 +272,3 @@ def mouseClickDetectionsAr():
     with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click) as mListener:
         kListener.join()
         mListener.join()
-
-
-mouseClickDetectionsAr()
