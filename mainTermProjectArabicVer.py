@@ -10,7 +10,7 @@ from cmu_112_graphics import *
 from pytesseract import Output
 
 
-def distinguishSections(img):
+def distinguishSectionsAr(img):
     # perform OCR on screenshot of full page
     custom_config = r'--oem 3 --psm 1'
     string = pytesseract.image_to_string(img, config=custom_config)
@@ -111,7 +111,7 @@ def distinguishSections(img):
     newMinMaxCoord = {}
 
     # helper function to combine the texts in the sections and their coordinates
-    def combineSections(minMaxDict, text1, text2):
+    def combineSectionsAr(minMaxDict, text1, text2):
         combineText = text1 + " " + text2
         combineCoord = [min(minMaxDict[text1][0], minMaxDict[text2][0]),
                         min(minMaxDict[text1][1], minMaxDict[text2][1]),
@@ -137,7 +137,7 @@ def distinguishSections(img):
                         1] < botY + marginY) and \
                             (topX - marginX < minMaxCoord[elem][0] < topX or botX < minMaxCoord[elem][
                                 2] < botX + marginX):
-                        newText, newCoord = combineSections(minMaxCoord, text, elem)
+                        newText, newCoord = combineSectionsAr(minMaxCoord, text, elem)
                         combinedTexts += [text, elem]
                         # create a new dictionary with the bigger sections
                         newMinMaxCoord[newText] = newCoord
@@ -150,7 +150,7 @@ def distinguishSections(img):
     return newMinMaxCoord
 
 
-def mouseClickDetections():
+def mouseClickDetectionsAr():
     # in order to run the program, the user must press alt
     def on_press(key):
         # when alt key pressed start listening for a mouse press
@@ -158,7 +158,8 @@ def mouseClickDetections():
             # moves mouse to the top left of the page
             mouse = Controller()
             mouse.position = (0, 1080)
-            tts = gtts.gTTS("The mouse has been moved to the bottom left of the page")
+            mouseMoveStr = "تم نقل الماوس إلى أسفل يسار الصفحة"
+            tts = gtts.gTTS(mouseMoveStr, lang="ar")
             tts.save("mouseMove.mp3")
             playsound("mouseMove.mp3")
             os.remove("mouseMove.mp3")
@@ -172,10 +173,11 @@ def mouseClickDetections():
             cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
 
             # extract sections of webpage
-            on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
+            on_press.stringWCoordDict = distinguishSectionsAr('fullPgScreenshot.jpg')
 
             # When the page is prepared for TTS
-            tts = gtts.gTTS("You may now begin clicking")
+            prepClicking = "يمكنك الآن البدء في النقر فوق"
+            tts = gtts.gTTS(prepClicking, lang="ar")
             tts.save("prepClicking.mp3")
             playsound("prepClicking.mp3")
             os.remove("prepClicking.mp3")
@@ -184,7 +186,8 @@ def mouseClickDetections():
             on_press.pgChange = False
 
         elif key == keyboard.Key.esc:
-            tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.")
+            goodByeStr = "مع السلامة. شكرا لك على استخدام قارئ الشاشة."
+            tts = gtts.gTTS(goodByeStr, lang="ar")
             tts.save("goodBye.mp3")
             playsound("goodBye.mp3")
             os.remove("goodBye.mp3")
@@ -220,8 +223,8 @@ def mouseClickDetections():
                 content2 = f.read()
             if content1 != content2:
                 # perform text to speech on string
-                tts = gtts.gTTS("You have activated a hyperlink or have scrolled, press Alt to use the screen "
-                                "reader on the changed page")
+                pgChangeStr = "لقد قمت بتنشيط ارتباط تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
+                tts = gtts.gTTS(pgChangeStr, lang="ar")
                 tts.save("ttsPgChange.mp3")
                 playsound("ttsPgChange.mp3")
 
@@ -255,46 +258,4 @@ def mouseClickDetections():
         mListener.join()
 
 
-def userInterface():
-    tts = gtts.gTTS("Press the space bar to listen to the instructions")
-    tts.save("startSpeech.mp3")
-    playsound("startSpeech.mp3")
-    os.remove("startSpeech.mp3")
-
-    instructions = """This application is a screen reader that helps you
-                    navigate websites. In order to use this screen reader
-                    go to the webpage that you want to be read and press alt.
-                    When you press alt your mouse will be moved to the bottom left
-                    of the page. In order to stop the program press esc.
-                    You can now begin to use the screen reader. In order to
-                    repeat the instructions press space. To repeat the instructions in arabic press A. 
-                    To leave the instructions press L"""
-
-    instructionsAr = "هذا التطبيق عبارة عن قارئ شاشة يساعدك على تصفح مواقع الويب. لاستخدام قارئ الشاشة هذا" \
-                     " ، انتقل إلى صفحة الويب التي تريد قراءتها واضغط على مفتاح بديل. عند الضغط على مفتاح بديل ، سيتم تحريك الماوس" \
-                     " إلى أسفل يسار الصفحة. لإيقاف البرنامج اضغط esc. يمكنك الآن البدء في استخدام قارئ الشاشة. من أجل تكرار" \
-                     " التعليمات اضغط على الفضاء. لتكرار التعليمات باللغة العربية اضغط على A. لترك التعليمات اضغط على L"
-
-    def on_press(key):
-        if key == keyboard.Key.space:
-            tts = gtts.gTTS(instructions)
-            tts.save("instructionsSpeech.mp3")
-            playsound("instructionsSpeech.mp3")
-            os.remove("instructionsSpeech.mp3")
-        # if L pressed, close instructions
-        elif key.char == "a":
-            tts = gtts.gTTS(instructionsAr)
-            tts.save("instructionsArSpeech.mp3")
-            playsound("instructionsArSpeech.mp3")
-            os.remove("instructionsArSpeech.mp3")
-
-        elif key.char == "l":
-            return False
-
-    with keyboard.Listener(on_press=on_press) as kListener:
-        kListener.join()
-
-    mouseClickDetections()
-
-
-userInterface()
+mouseClickDetectionsAr()
