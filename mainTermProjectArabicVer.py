@@ -219,37 +219,38 @@ def mouseClickDetectionsAr():
             # receive mouse press coordinates
             mousePressCoord = [x, y - 100]
 
-            # take a screenshot to compare with original screenshot to check if hyperlink was pressed
-            im = pyautogui.screenshot('comparePgScreenshot.png', region=(0, 100, 1440, 900))
+            if os.path.isfile('fullPgScreenshot.jpg'):
+                # take a screenshot to compare with original screenshot to check if hyperlink was pressed
+                im = pyautogui.screenshot('comparePgScreenshot.png', region=(0, 100, 1440, 900))
 
-            # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
-            pngToJpg = cv2.imread('comparePgScreenshot.png', cv2.IMREAD_GRAYSCALE)
-            cv2.imwrite('comparePgScreenshot.jpg', pngToJpg)
+                # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
+                pngToJpg = cv2.imread('comparePgScreenshot.png', cv2.IMREAD_GRAYSCALE)
+                cv2.imwrite('comparePgScreenshot.jpg', pngToJpg)
 
-            # check if two screenshots are the same - (abhi, StackOverFlow, 2020)
-            # https://stackoverflow.com/questions/1927660/compare-two-images-the-python-linux-way
-            with open('fullPgScreenshot.jpg', 'rb') as f:
-                content1 = f.read()
-            with open('comparePgScreenshot.jpg', 'rb') as f:
-                content2 = f.read()
-            if content1 != content2:
+                # check if two screenshots are the same - (abhi, StackOverFlow, 2020)
+                # https://stackoverflow.com/questions/1927660/compare-two-images-the-python-linux-way
+                with open('fullPgScreenshot.jpg', 'rb') as f:
+                    content1 = f.read()
+                with open('comparePgScreenshot.jpg', 'rb') as f:
+                    content2 = f.read()
+                if content1 != content2:
 
-                # perform text to speech on string
-                # instructions are in arabic
-                pgChangeStr = "لقد قمت بتنشيط ارتباط" \
-                              " تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
+                    # perform text to speech on string
+                    # instructions are in arabic
+                    pgChangeStr = "لقد قمت بتنشيط ارتباط" \
+                                  " تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
 
-                tts = gtts.gTTS(pgChangeStr, lang="ar")
-                tts.save("ttsPgChange.mp3")
-                playsound("ttsPgChange.mp3")
+                    tts = gtts.gTTS(pgChangeStr, lang="ar")
+                    tts.save("ttsPgChange.mp3")
+                    playsound("ttsPgChange.mp3")
 
-                # remove extra files created for screen reading process
-                os.remove('ttsPgChange.mp3')
-                on_press.pgChange = True
+                    # remove extra files created for screen reading process
+                    os.remove('ttsPgChange.mp3')
+                    on_press.pgChange = True
 
-            # remove unnecessary files
-            os.remove('comparePgScreenshot.jpg')
-            os.remove('comparePgScreenshot.png')
+                # remove unnecessary files
+                os.remove('comparePgScreenshot.jpg')
+                os.remove('comparePgScreenshot.png')
 
         # check if page hasn't been changed with last click
         if not on_press.pgChange:
@@ -258,7 +259,7 @@ def mouseClickDetectionsAr():
                 if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
                         stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
                     # perform text to speech on extracted string
-                    tts = gtts.gTTS(string)
+                    tts = gtts.gTTS(string, lang="ar")
                     tts.save("ttsOnString.mp3")
                     playsound("ttsOnString.mp3")
 
