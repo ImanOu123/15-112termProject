@@ -8,6 +8,7 @@ import cv2
 import pytesseract
 from cmu_112_graphics import *
 from pytesseract import Output
+from mainTermProjectArabicVer import *
 
 
 def distinguishSections(img):
@@ -256,6 +257,7 @@ def mouseClickDetections():
 
 
 def userInterface():
+    userInterface.screenReaderLanguage = "Eng"
     tts = gtts.gTTS("Press the space bar to listen to the instructions")
     tts.save("startSpeech.mp3")
     playsound("startSpeech.mp3")
@@ -283,6 +285,11 @@ def userInterface():
             tts.save("instructionsSpeech.mp3")
             playsound("instructionsSpeech.mp3")
             os.remove("instructionsSpeech.mp3")
+
+            # if the last spoken instruction was in English do OCR in English
+
+            userInterface.screenReaderLanguage = "Eng"
+
         # if L pressed, close instructions
         elif key.char == "a":
             tts = gtts.gTTS(instructionsAr, lang="ar")
@@ -290,14 +297,20 @@ def userInterface():
             playsound("instructionsArSpeech.mp3")
             os.remove("instructionsArSpeech.mp3")
 
+            # if the last spoken instruction was in Arabic do OCR in Arabic
+
+            userInterface.screenReaderLanguage = "Ar"
+
         elif key.char == "l":
             return False
 
     with keyboard.Listener(on_press=on_press) as kListener:
         kListener.join()
 
-    mouseClickDetections()
+    if userInterface.screenReaderLanguage == "Eng":
+        mouseClickDetections()
+    elif userInterface.screenReaderLanguage == "Ar":
+        mouseClickDetectionsAr()
 
 
 userInterface()
-

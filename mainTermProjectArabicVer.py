@@ -223,7 +223,8 @@ def mouseClickDetectionsAr():
                 content2 = f.read()
             if content1 != content2:
                 # perform text to speech on string
-                pgChangeStr = "لقد قمت بتنشيط ارتباط تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
+                pgChangeStr = "لقد قمت بتنشيط ارتباط" \
+                              " تشعبي أو قمت بالتمرير ، اضغط على Alt لاستخدام قارئ الشاشة على الصفحة التي تم تغييرها"
                 tts = gtts.gTTS(pgChangeStr, lang="ar")
                 tts.save("ttsPgChange.mp3")
                 playsound("ttsPgChange.mp3")
@@ -253,6 +254,7 @@ def mouseClickDetectionsAr():
 
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
     # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python
+
     with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click) as mListener:
         kListener.join()
         mListener.join()
