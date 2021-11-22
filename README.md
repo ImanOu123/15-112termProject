@@ -2,7 +2,7 @@ Title: Screen Reader for the Visually Impaired
 
 Instructions to Run Project:
 
-Note: Be very mindful of your clicks, press them firmly and slowly. The program handles various
+Note: Be very mindful of your clicks, press them firmly and slowly. The program handles various errors but it is not perfect.
 
 1. Go to any webpage on Google Chrome (a sample webpage: https://en.wikipedia.org/wiki/Cat)
 2. Run the program; it will tell you to press space bar
