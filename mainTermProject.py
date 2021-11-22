@@ -96,7 +96,7 @@ def distinguishSections(img):
     for elem in coordDict:
         minMaxCoord[elem] = [99999, 99999, 0, 0]
         for i in coordDict[elem]:
-            # print(i[0], i[1], minMaxCoord[elem])
+
             if i[0] <= minMaxCoord[elem][0]:
                 minMaxCoord[elem][0] = i[0]
 
@@ -300,8 +300,8 @@ def mouseClickDetections():
             for string in stringWCoordDict:
                 if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
                         stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
+
                     # perform text to speech on extracted string
-                    print("hello")
 
                     tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
                     tts.save("ttsOnString.mp3")
@@ -448,7 +448,7 @@ def userInterface():
 
                 # options for the accent
 
-                accentOptions = ["American", "Australian", "British", "Indian", "French", "Spanish"]
+                accentOptions = ["American", "Australian", "British", "French", "Spanish"]
                 userInterface.accent = accentOptions[userInterface.accentIdx % len(accentOptions)]
 
                 # if you want an American accent
@@ -479,17 +479,6 @@ def userInterface():
                     userInterface.lang = "en"
                     userInterface.tld = "co.uk"
                     tts = gtts.gTTS("British", lang=userInterface.lang,
-                                    tld=userInterface.tld)
-                    tts.save("accentChange.mp3")
-                    playsound("accentChange.mp3")
-                    os.remove("accentChange.mp3")
-
-                # if you want an Indian accent
-
-                elif userInterface.accent == "Indian":
-                    userInterface.lang = "en"
-                    userInterface.tld = "co.in"
-                    tts = gtts.gTTS("Indian", lang=userInterface.lang,
                                     tld=userInterface.tld)
                     tts.save("accentChange.mp3")
                     playsound("accentChange.mp3")
