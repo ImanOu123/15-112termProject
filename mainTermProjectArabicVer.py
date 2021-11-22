@@ -154,9 +154,15 @@ def distinguishSectionsAr(img):
 
 
 def mouseClickDetectionsAr():
+
     # in order to run the program, the user must press alt
+
     def on_press(key):
+
+        on_press.pgChange = None
+
         # when alt key pressed start listening for a mouse press
+
         if key == keyboard.Key.alt:
             # moves mouse to the top left of the page
             mouse = Controller()

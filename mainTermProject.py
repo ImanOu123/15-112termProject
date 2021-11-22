@@ -172,6 +172,8 @@ def mouseClickDetections():
     # in order to run the program, the user must press alt
 
     def on_press(key):
+        
+        on_press.pgChange = None
 
         # when alt key pressed start listening for a mouse press
 
@@ -295,6 +297,7 @@ def mouseClickDetections():
         # check if page hasn't been changed with last click
 
         if not on_press.pgChange:
+
             # check if if the mousePress is within any of the predefined sections
 
             for string in stringWCoordDict:
