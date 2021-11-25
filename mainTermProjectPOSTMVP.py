@@ -10,11 +10,12 @@ from cmu_112_graphics import *
 from pytesseract import Output
 from mainTermProjectArabicVer import *
 
+
 # Post-MVP Modules
 
 
-
 # GITHUB REPO - https://github.com/ImanOu123/15-112termProject
+
 
 def distinguishSections(img):
     # perform OCR on screenshot of full page
@@ -173,152 +174,183 @@ def distinguishSections(img):
     return newMinMaxCoord
 
 
+# BUG FIX - CHECKING URL TO CHECK IF HYPERLINK PRESSED
+
+def checkForHyperlinkPress():
+    # check if page changed based on if url changed
+
+    compareImg = pyautogui.screenshot('urlScreenshotCompare.png', region=(100, 50, 1000, 51))
+
+    pngToJpgOG = cv2.imread('urlScreenshotOG.png')
+    pngToJpgCompare = cv2.imread('urlScreenshotCompare.png')
+
+    invertOG = cv2.bitwise_not(pngToJpgOG)
+    invertCompare = cv2.bitwise_not(pngToJpgCompare)
+
+    cv2.imwrite('urlScreenshotOG.jpg', invertOG)
+    cv2.imwrite('urlScreenshotCompare.jpg', invertCompare)
+
+    # custom_config = r'--oem 3 --psm 1'
+
+    stringOG = pytesseract.image_to_string(invertOG)
+    stringCompare = pytesseract.image_to_string(invertCompare)
+
+    os.remove('urlScreenshotOG.png')
+    os.remove('urlScreenshotCompare.png')
+    os.remove('urlScreenshotOG.jpg')
+    os.remove('urlScreenshotCompare.jpg')
+
+    # extract urls from the string extracted via OCR - based on slash
+
+    for word in stringOG.split(" "):
+        if "/" in word or ".com" in word or ".org" in word:
+            OGUrl = word
+
+    for word in stringCompare.split(" "):
+        if "/" in word or ".com" in word or ".org" in word:
+            CompareUrl = word
+
+    # checks if urls are equal to detect whether a hyperlink has been clicked
+
+    if OGUrl != CompareUrl:
+        return False
+    else:
+        return True
+
+
+# NEW FEATURE - if the user is currently hovering over a hyperlink, the program will let them know
+def hoveringOverHyperlink():
+    pass
+
+
 def mouseClickDetections():
     # in order to run the program, the user must press alt
 
     def on_press(key):
 
-        on_press.pgChange = None
+        on_press.pgChange = False
+        try:
+            if key.char == "x":
+                mouse = Controller()
+                mouseClickDetections.mouseLoc = list(mouse.position)
+                mouseClickDetections.mouseLoc[1] -= 100
 
-        # when alt key pressed start listening for a mouse press
+                if not on_press.pgChange:
 
-        if key == keyboard.Key.alt:
+                    # check if if mouse is hovering within any of the predefined sections
 
-            # moves mouse to the top left of the page
+                    for string in on_press.stringWCoordDict:
+                        if on_press.stringWCoordDict[string][0] <= mouseClickDetections.mouseLoc[0] <= \
+                                on_press.stringWCoordDict[string][2] and \
+                                on_press.stringWCoordDict[string][1] < mouseClickDetections.mouseLoc[1] < \
+                                on_press.stringWCoordDict[string][3]:
 
-            mouse = Controller()
-            mouse.position = (0, 1080)
-            tts = gtts.gTTS("The mouse has been moved to the bottom left of the page", lang=userInterface.lang,
-                            tld=userInterface.tld)
-            tts.save("mouseMove.mp3")
-            playsound("mouseMove.mp3")
-            os.remove("mouseMove.mp3")
+                            # perform text to speech on extracted string
 
-            # takes a screenshot of the current page - region doesn't include address bar -
-            # may need to adjust to fit screen
+                            tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
+                            tts.save("ttsOnString.mp3")
+                            playsound("ttsOnString.mp3")
 
-            img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
+                            # remove extra files created for screen reading process
 
-            # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
+                            os.remove('ttsOnString.mp3')
 
-            pngToJpg = cv2.imread('fullPgScreenshot.png', cv2.IMREAD_GRAYSCALE)
-            cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
+                            if hoveringOverHyperlink():
+                                tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
+                                tts.save("ttsOnString.mp3")
+                                playsound("ttsOnString.mp3")
 
-            # extract sections of webpage
+                                # remove extra files created for tts process
+                                os.remove('ttsOnString.mp3')
 
-            on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
+                    on_press.pgChange = False
 
-            # When the page is prepared for TTS
+        except AttributeError:
+            # when alt key pressed start listening for a mouse press
+            if key == keyboard.Key.alt:
 
-            tts = gtts.gTTS("You may now begin clicking", lang=userInterface.lang,
-                            tld=userInterface.tld)
-            tts.save("prepClicking.mp3")
-            playsound("prepClicking.mp3")
-            os.remove("prepClicking.mp3")
+                # moves mouse to the top left of the page
 
-            # page change variable, won't read any text until Alt is pressed again
+                mouse = Controller()
+                mouse.position = (0, 1080)
+                tts = gtts.gTTS("The mouse has been moved to the bottom left of the page", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("mouseMove.mp3")
+                playsound("mouseMove.mp3")
+                os.remove("mouseMove.mp3")
 
-            on_press.pgChange = False
+                # takes a screenshot of the current page - region doesn't include address bar -
+                # may need to adjust to fit screen
 
-        elif key == keyboard.Key.esc:
+                img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
+                mouseClickDetections.urlImg = pyautogui.screenshot('urlScreenshotOG.png', region=(100, 50, 1000, 51))
 
-            # message when escape is pressed
+                # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
 
-            tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.", lang=userInterface.lang,
-                            tld=userInterface.tld)
-            tts.save("goodBye.mp3")
-            playsound("goodBye.mp3")
-            os.remove("goodBye.mp3")
+                pngToJpg = cv2.imread('fullPgScreenshot.png', cv2.IMREAD_GRAYSCALE)
+                cv2.imwrite('fullPgScreenshot.jpg', pngToJpg)
 
-            # remove extra files
+                # extract sections of webpage
 
-            os.remove("fullPgScreenshot.jpg")
+                on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
 
-            # Stop mouse and keyboard listeners
+                # When the page is prepared for TTS
 
-            mListener.stop()
-            return False
+                tts = gtts.gTTS("You may now begin clicking", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("prepClicking.mp3")
+                playsound("prepClicking.mp3")
+                os.remove("prepClicking.mp3")
+
+                # page change variable, won't read any text until Alt is pressed again
+
+                on_press.pgChange = False
+
+            # to leave the screen reader
+
+            elif key == keyboard.Key.esc:
+
+                # message when escape is pressed
+
+                tts = gtts.gTTS("Goodbye. Thank you for using the screen reader.", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("goodBye.mp3")
+                playsound("goodBye.mp3")
+                os.remove("goodBye.mp3")
+
+                # remove extra files
+
+                os.remove("fullPgScreenshot.jpg")
+
+                # Stop mouse and keyboard listeners
+
+                mListener.stop()
+                return False
 
     def on_click(x, y, button, pressed):
-
         # detects the mouse coordinates via the mouse listener
-
         mousePressCoord = [0, 0]
-        try:
-            stringWCoordDict = on_press.stringWCoordDict
-        except:
-            stringWCoordDict = {}
 
         # checks if the mouse has been pressed
-
         if pressed:
-
             # receive mouse press coordinates
 
             mousePressCoord = [x, y - 100]
 
             # checks if page screen shot has been previously made to avoid any bugs and errors with clicking
 
-            # take a screenshot to compare with original screenshot to check if hyperlink was pressed
+            if checkForHyperlinkPress():
+                # tts of pressing hyperlink and how alt must be pressed to process new page
+                tts = gtts.gTTS("You have activated a hyperlink, press Alt to use the screen "
+                                "reader on the changed page", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("ttsPgChange.mp3")
+                playsound("ttsPgChange.mp3")
 
-            if os.path.isfile('fullPgScreenshot.jpg'):
-                im = pyautogui.screenshot('comparePgScreenshot.png', region=(0, 100, 1440, 900))
+                # remove extra files created for screen reading process
 
-                # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
-
-                pngToJpg = cv2.imread('comparePgScreenshot.png', cv2.IMREAD_GRAYSCALE)
-                cv2.imwrite('comparePgScreenshot.jpg', pngToJpg)
-
-                # check if two screenshots are the same - (abhi, StackOverFlow, 2020)
-                # https://stackoverflow.com/questions/1927660/compare-two-images-the-python-linux-way
-
-                with open('fullPgScreenshot.jpg', 'rb') as f:
-                    content1 = f.read()
-                with open('comparePgScreenshot.jpg', 'rb') as f:
-                    content2 = f.read()
-
-                # if the pages differ then let the user know that they have activated a hyper link
-                # or scrolled
-
-                if content1 != content2:
-                    # perform text to speech on string
-
-                    tts = gtts.gTTS("You have activated a hyperlink or have scrolled, press Alt to use the screen "
-                                    "reader on the changed page", lang=userInterface.lang,
-                                    tld=userInterface.tld)
-                    tts.save("ttsPgChange.mp3")
-                    playsound("ttsPgChange.mp3")
-
-                    # remove extra files created for screen reading process
-
-                    os.remove('ttsPgChange.mp3')
-                    on_press.pgChange = True
-
-                # remove unnecessary files
-
-                os.remove('comparePgScreenshot.jpg')
-                os.remove('comparePgScreenshot.png')
-
-        # check if page hasn't been changed with last click
-
-        if not on_press.pgChange:
-
-            # check if if the mousePress is within any of the predefined sections
-
-            for string in stringWCoordDict:
-                if stringWCoordDict[string][0] <= mousePressCoord[0] <= stringWCoordDict[string][2] and \
-                        stringWCoordDict[string][1] < mousePressCoord[1] < stringWCoordDict[string][3]:
-                    # perform text to speech on extracted string
-
-                    tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
-                    tts.save("ttsOnString.mp3")
-                    playsound("ttsOnString.mp3")
-
-                    # remove extra files created for screen reading process
-
-                    os.remove('ttsOnString.mp3')
-
-            on_press.pgChange = False
+                os.remove('ttsPgChange.mp3')
+                on_press.pgChange = True
 
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
     # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python

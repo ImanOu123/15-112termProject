@@ -154,7 +154,6 @@ def distinguishSectionsAr(img):
 
 
 def mouseClickDetectionsAr():
-
     # in order to run the program, the user must press alt
 
     def on_press(key):
@@ -240,7 +239,6 @@ def mouseClickDetectionsAr():
                 with open('comparePgScreenshot.jpg', 'rb') as f:
                     content2 = f.read()
                 if content1 != content2:
-
                     # perform text to speech on string
                     # instructions are in arabic
                     pgChangeStr = "لقد قمت بتنشيط ارتباط" \

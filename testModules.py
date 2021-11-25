@@ -384,10 +384,10 @@ import gtts
 from playsound import playsound
 import os
 #
-tts = gtts.gTTS("My name is Iman and I love chocolate ", lang="en", slow=True)
-tts.save("instructionsArSpeech.mp3")
-playsound("instructionsArSpeech.mp3")
-os.remove("instructionsArSpeech.mp3")
+# tts = gtts.gTTS("My name is Iman and I love chocolate ", lang="en", slow=True)
+# tts.save("instructionsArSpeech.mp3")
+# playsound("instructionsArSpeech.mp3")
+# os.remove("instructionsArSpeech.mp3")
 
 
 from pynput import keyboard
@@ -404,7 +404,82 @@ from pynput import keyboard
 #             print("bye", key.char)
 
 
+#
+# with keyboard.Listener(
+#         on_press=on_press) as listener:
+#     listener.join()
 
-with keyboard.Listener(
-        on_press=on_press) as listener:
-    listener.join()
+import tkinter as tk
+import tkinter.font as tkFont
+
+# gui = tk.Tk()
+#
+# gui.geometry("500x500")
+# gui.title("Screen Reader for Visually Impaired")
+#
+# frame = tk.Frame(gui)
+# frame.pack(side="top", expand=True, fill="both")
+# instruction = """This application is a screen reader that helps you
+#                     navigate websites. In order to use this screen reader
+#                     go to the webpage that you want to be read and press alt.
+#                     When you press alt your mouse will be moved to the bottom left
+#                     of the page. In order to stop the program press Escape.
+#                     You can now begin to use the screen reader. To change the dialect press D. In order to
+#                     repeat the instructions in English press the spacebar. To repeat the instructions in arabic press A.
+#                     To leave the instructions press L."""
+# fontStyle = tkFont.Font(family="Lucida Grande", size=12)
+# instructionLabel = tk.Label(frame,padx = 10, compound = tk.CENTER, text=instruction, font=fontStyle).pack(side="left")
+# # instructionLabel.place()
+# gui.mainloop()
+
+# import tkinter as tk
+#
+# gui = tk.Tk()
+# gui.geometry("500x500")
+# gui.title("Screen Reader for Visually Impaired")
+# instruction = """This application is a screen reader that helps you navigate websites.
+# In order to use this screen reader go to the webpage that you want to be read
+# and press alt. When you press alt your mouse will be moved to the
+# bottom left of the page. In order to stop the program press
+# Escape. You can now begin to use the screen reader.
+# To change the dialect press D. In order to repeat the
+# instructions in English press the spacebar. To repeat the
+# instructions in arabic press A. To leave the instructions press L."""
+#
+# instrucLabel = tk.Label(gui, compound=tk.RIGHT, text=instruction, pady=50).pack(anchor="center")
+#
+# gui.mainloop()
+
+# from pynput.mouse import Button, Controller
+#
+# mouse = Controller()
+# mouseLoc = list(mouse.position)
+# print(mouseLoc)
+import gtts
+from playsound import playsound
+import pyautogui
+from pynput import keyboard
+from pynput import mouse
+from pynput.mouse import Controller
+import cv2
+import pytesseract
+from cmu_112_graphics import *
+from pytesseract import Output
+
+
+urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(100, 50, 1000, 51))
+
+pngToJpg = cv2.imread('fullPgScreenshot.png')
+
+invert = cv2.bitwise_not(pngToJpg)
+
+cv2.imwrite('fullPgScreenshot.jpg', invert)
+
+# custom_config = r'--oem 3 --psm 1'
+string = pytesseract.image_to_string(invert)
+os.remove('fullPgScreenshot.png')
+# os.remove('fullPgScreenshot.jpg')
+print(string)
+for i in string.split(" "):
+    if "/" in i or ".com" in i or ".org" in i:
+        print(i)
