@@ -467,19 +467,27 @@ from cmu_112_graphics import *
 from pytesseract import Output
 
 
-urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(100, 50, 1000, 51))
+# urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(100, 50, 1000, 51))
+#
+# pngToJpg = cv2.imread('fullPgScreenshot.png')
+#
+# invert = cv2.bitwise_not(pngToJpg)
+#
+# cv2.imwrite('fullPgScreenshot.jpg', invert)
+#
+# # custom_config = r'--oem 3 --psm 1'
+# string = pytesseract.image_to_string(invert)
+# os.remove('fullPgScreenshot.png')
+# # os.remove('fullPgScreenshot.jpg')
+# print(string)
+# for i in string.split(" "):
+#     if "/" in i or ".com" in i or ".org" in i:
+#         print(i)
 
+urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 870, 720, 900))
 pngToJpg = cv2.imread('fullPgScreenshot.png')
-
 invert = cv2.bitwise_not(pngToJpg)
-
 cv2.imwrite('fullPgScreenshot.jpg', invert)
-
-# custom_config = r'--oem 3 --psm 1'
-string = pytesseract.image_to_string(invert)
 os.remove('fullPgScreenshot.png')
-# os.remove('fullPgScreenshot.jpg')
+string = pytesseract.image_to_string(invert)
 print(string)
-for i in string.split(" "):
-    if "/" in i or ".com" in i or ".org" in i:
-        print(i)

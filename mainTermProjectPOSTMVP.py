@@ -190,14 +190,10 @@ def checkForHyperlinkPress():
     cv2.imwrite('urlScreenshotOG.jpg', invertOG)
     cv2.imwrite('urlScreenshotCompare.jpg', invertCompare)
 
-    # custom_config = r'--oem 3 --psm 1'
-
     stringOG = pytesseract.image_to_string(invertOG)
     stringCompare = pytesseract.image_to_string(invertCompare)
 
-    os.remove('urlScreenshotOG.png')
     os.remove('urlScreenshotCompare.png')
-    os.remove('urlScreenshotOG.jpg')
     os.remove('urlScreenshotCompare.jpg')
 
     # extract urls from the string extracted via OCR - based on slash
@@ -219,8 +215,28 @@ def checkForHyperlinkPress():
 
 
 # NEW FEATURE - if the user is currently hovering over a hyperlink, the program will let them know
+# This detection occurs only after user requests screen reading of section
+
 def hoveringOverHyperlink():
-    pass
+    urlImg = pyautogui.screenshot('tinyURLInCorner.png', region=(0, 870, 720, 900))
+
+    pngToJpg = cv2.imread('tinyURLInCorner.png')
+
+    # for better OCR on image
+    invert = cv2.bitwise_not(pngToJpg)
+    cv2.imwrite('tinyURLInCorner.jpg', invert)
+
+    os.remove('tinyURLInCorner.jpg')
+    os.remove('tinyURLInCorner.png')
+
+    # checks whether a tiny url shows up at the bottom left of the page that indicates the user
+    # is hovering of a url
+    tinyURL = pytesseract.image_to_string(invert)
+
+    if "/" in tinyURL:
+        return [True, tinyURL]
+    else:
+        return [False]
 
 
 def mouseClickDetections():
@@ -240,6 +256,9 @@ def mouseClickDetections():
                     # check if if mouse is hovering within any of the predefined sections
 
                     for string in on_press.stringWCoordDict:
+
+                        # NEW FEATURE - instead of clicking, the user hovers over section and presses x
+
                         if on_press.stringWCoordDict[string][0] <= mouseClickDetections.mouseLoc[0] <= \
                                 on_press.stringWCoordDict[string][2] and \
                                 on_press.stringWCoordDict[string][1] < mouseClickDetections.mouseLoc[1] < \
@@ -255,8 +274,17 @@ def mouseClickDetections():
 
                             os.remove('ttsOnString.mp3')
 
-                            if hoveringOverHyperlink():
-                                tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
+                            hovering = hoveringOverHyperlink()
+
+                            if hovering[0]:
+                                # the program will let you know that you are hovering over a hyperlink and will let
+                                # you know where the hyperlink is taking you to
+
+                                tts = gtts.gTTS(
+                                    f"You are currently hovering over a hyperlink, by clicking on the link "
+                                    f"you will be relocated to {hoveringOverHyperlink()[1]}",
+                                    lang=userInterface.lang,
+                                    tld=userInterface.tld)
                                 tts.save("ttsOnString.mp3")
                                 playsound("ttsOnString.mp3")
 
@@ -283,6 +311,9 @@ def mouseClickDetections():
                 # may need to adjust to fit screen
 
                 img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
+
+                # for detecting whether hyperlink is pressed
+
                 mouseClickDetections.urlImg = pyautogui.screenshot('urlScreenshotOG.png', region=(100, 50, 1000, 51))
 
                 # convert image from png to jpg so it can be used for the OCR - Grayscale is for better recognition
@@ -296,7 +327,7 @@ def mouseClickDetections():
 
                 # When the page is prepared for TTS
 
-                tts = gtts.gTTS("You may now begin clicking", lang=userInterface.lang,
+                tts = gtts.gTTS("You may now begin using the screen reader", lang=userInterface.lang,
                                 tld=userInterface.tld)
                 tts.save("prepClicking.mp3")
                 playsound("prepClicking.mp3")
@@ -305,6 +336,11 @@ def mouseClickDetections():
                 # page change variable, won't read any text until Alt is pressed again
 
                 on_press.pgChange = False
+
+                # for detecting scroll
+
+                mouseClickDetections.altPressed = True
+                mouseClickDetections.scrolledCount = 0
 
             # to leave the screen reader
 
@@ -320,7 +356,12 @@ def mouseClickDetections():
 
                 # remove extra files
 
-                os.remove("fullPgScreenshot.jpg")
+                if os.path.isfile("fullPgScreenshot.jpg"):
+                    os.remove("fullPgScreenshot.jpg")
+                if os.path.isfile('urlScreenshotOG.jpg'):
+                    os.remove('urlScreenshotOG.jpg')
+                if os.path.isfile('urlScreenshotOG.png'):
+                    os.remove('urlScreenshotOG.png')
 
                 # Stop mouse and keyboard listeners
 
@@ -333,9 +374,6 @@ def mouseClickDetections():
 
         # checks if the mouse has been pressed
         if pressed:
-            # receive mouse press coordinates
-
-            mousePressCoord = [x, y - 100]
 
             # checks if page screen shot has been previously made to avoid any bugs and errors with clicking
 
@@ -352,10 +390,28 @@ def mouseClickDetections():
                 os.remove('ttsPgChange.mp3')
                 on_press.pgChange = True
 
+    # NEW FEATURE - detects whether user has scrolled if so, won't allow screen reading until alt pressed again
+    def on_scroll(x, y, dx, dy):
+        mouseClickDetections.scrolledCount += 1
+        if mouseClickDetections.altPressed and (mouseClickDetections.scrolledCount == 1):
+            # tts of pressing hyperlink and how alt must be pressed to process new page
+            tts = gtts.gTTS("You have scrolled, press Alt to use the screen "
+                            "reader on the changed page", lang=userInterface.lang,
+                            tld=userInterface.tld)
+            tts.save("ttsPgChange.mp3")
+            playsound("ttsPgChange.mp3")
+
+            # remove extra files created for screen reading process
+
+            os.remove('ttsPgChange.mp3')
+            on_press.pgChange = True
+
+
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
     # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python
 
-    with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click) as mListener:
+    with keyboard.Listener(on_press=on_press) as kListener, mouse.Listener(on_click=on_click, on_scroll=on_scroll) \
+            as mListener:
         kListener.join()
         mListener.join
 
