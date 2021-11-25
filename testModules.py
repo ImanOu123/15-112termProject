@@ -484,10 +484,31 @@ from pytesseract import Output
 #     if "/" in i or ".com" in i or ".org" in i:
 #         print(i)
 
-urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 870, 720, 900))
-pngToJpg = cv2.imread('fullPgScreenshot.png')
-invert = cv2.bitwise_not(pngToJpg)
-cv2.imwrite('fullPgScreenshot.jpg', invert)
-os.remove('fullPgScreenshot.png')
-string = pytesseract.image_to_string(invert)
-print(string)
+# urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 870, 720, 900))
+# pngToJpg = cv2.imread('fullPgScreenshot.png')
+# invert = cv2.bitwise_not(pngToJpg)
+# cv2.imwrite('fullPgScreenshot.jpg', invert)
+# os.remove('fullPgScreenshot.png')
+# string = pytesseract.image_to_string(invert)
+# print(string)
+
+import os
+# BUG FIX -
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+from imageai.Detection import ObjectDetection
+
+# (Priyal, Medium, 2020)
+# https://medium.datadriveninvestor.com/ai-object-detection-using-only-10-lines-of-code-imageai-89d3ba9886ea
+
+# DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
+
+execution_path = os.getcwd()
+detector = ObjectDetection()
+detector.setModelTypeAsRetinaNet()
+detector.setModelPath( os.path.join(execution_path , "resnet50_coco_best_v2.1.0.h5"))
+detector.loadModel()
+detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path , "sampleImages/fullPage1.jpg"),
+                                             output_image_path=os.path.join(execution_path , "imagenew.jpg"))
+for eachObject in detections:
+    print(eachObject["name"], " : ", eachObject["percentage_probability"])
