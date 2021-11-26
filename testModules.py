@@ -491,28 +491,33 @@ from pytesseract import Output
 # string = pytesseract.image_to_string(invert)
 # print(string)
 
-import os
+from imageai.Detection import ObjectDetection
 
-# BUG FIX -
+# BUG FIX - for tensor flow error
+# (GTS, StackOverFlow, 2021)
+# https://stackoverflow.com/questions/66092421/how-to-rebuild-tensorflow-with-the-compiler-flags
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from imageai.Detection import ObjectDetection
+# Using a pretrained model to detect the location of an image
 
 # (Priyal, Medium, 2020)
 # https://medium.datadriveninvestor.com/ai-object-detection-using-only-10-lines-of-code-imageai-89d3ba9886ea
-
-# DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
 #
+# DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
+
 execution_path = os.getcwd()
 detector = ObjectDetection()
 detector.setModelTypeAsRetinaNet()
 detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
 detector.loadModel()
-detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/fullPage3.jpg"),
+detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/webpageWithImgsSample.jpg"),
                                              output_image_path=os.path.join(execution_path, "imagenew.jpg"))
-print(detections)
-for eachObject in detections:
-    print(eachObject["name"], " : ", eachObject["percentage_probability"])
 
-# 'box_points' [90, 165, 340, 606]
+# determine all image locations and what objects are in the image
+imgLocs = {}
+for obj in detections:
+    pass
 
+# find images that contain more than one object, based on distance or overlap of bounding box
+
+#  if multiple objects are found in an image; combine their locations and text into a user-friendly manner

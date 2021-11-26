@@ -263,7 +263,7 @@ def detectingImgsOnWebpage(imgPath):
     # determine all image locations and what objects are in the image
     imgLocs = {}
     for obj in detections:
-
+        pass
 
     # find images that contain more than one object, based on distance or overlap of bounding box
 
