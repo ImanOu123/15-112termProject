@@ -8,10 +8,12 @@ import cv2
 import pytesseract
 from cmu_112_graphics import *
 from pytesseract import Output
-from mainTermProjectArabicVer import *
+from mainTermProjectArPOSTMVP import *
 
 # Post-MVP Modules
 from imageai.Detection import ObjectDetection
+from googletrans import Translator, constants
+
 
 # GITHUB REPO - https://github.com/ImanOu123/15-112termProject
 
@@ -216,22 +218,20 @@ def checkForHyperlinkPress():
 # This detection occurs only after user requests screen reading of section
 
 def hoveringOverHyperlink():
-    # Note - works occasionally
+    # Note - has a less than 50 percent accuracy rate
 
     urlImg = pyautogui.screenshot('tinyURLInCorner.png', region=(0, 870, 720, 900))
 
     pngToJpg = cv2.imread('tinyURLInCorner.png')
 
-    # for better OCR on image
-    invert = cv2.bitwise_not(pngToJpg)
-    cv2.imwrite('tinyURLInCorner.jpg', invert)
+    cv2.imwrite('tinyURLInCorner.jpg', pngToJpg)
 
     os.remove('tinyURLInCorner.jpg')
     os.remove('tinyURLInCorner.png')
 
     # checks whether a tiny url shows up at the bottom left of the page that indicates the user
     # is hovering of a url
-    tinyURL = pytesseract.image_to_string(invert)
+    tinyURL = pytesseract.image_to_string(pngToJpg)
 
     if "/" in tinyURL:
         return [True, tinyURL]
@@ -354,13 +354,85 @@ def detectingImgsOnWebpage(imgPath):
 
 
 def mouseClickDetections():
+    # for translation
+    mouseClickDetections.currentlyTranslating = False
+    mouseClickDetections.translateNextSec = False
+    mouseClickDetections.translateLang = "en"
+    mouseClickDetections.langIdx = 0
+
     # in order to run the program, the user must press alt
 
     def on_press(key):
 
         on_press.pgChange = False
         try:
-            if key.char == "x":
+            # NEW FEATURE - translation of next selected section
+            if key.char == "t":
+                tts = gtts.gTTS("You have opted to translate the next section spoken. In order to select a language to"
+                                "translate to, press the w key and then press enter when you find your desired"
+                                "language.", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("translateInstruc.mp3")
+                playsound("translateInstruc.mp3")
+                os.remove("translateInstruc.mp3")
+                # let the user know how to use the translation
+
+                mouseClickDetections.currentlyTranslating = True
+
+            elif key.char == "w":
+                # click up arrow key to select language
+                if mouseClickDetections.currentlyTranslating:
+
+                    # options for the language
+
+                    langOptions = ["English", "French", "Spanish", "Arabic"]
+                    mouseClickDetections.chosenLang = langOptions[mouseClickDetections.langIdx % len(langOptions)]
+
+                    # if you want to translate to english
+
+                    if mouseClickDetections.chosenLang == "English":
+                        mouseClickDetections.translateLang = "en"
+                        tts = gtts.gTTS("English", lang=userInterface.lang,
+                                        tld=userInterface.tld)
+                        tts.save("langChange.mp3")
+                        playsound("langChange.mp3")
+                        os.remove("langChange.mp3")
+
+                    # if you want to translate to arabic
+
+                    elif mouseClickDetections.chosenLang == "Arabic":
+                        mouseClickDetections.translateLang = "ar"
+                        tts = gtts.gTTS("Arabic", lang=userInterface.lang,
+                                        tld=userInterface.tld)
+                        tts.save("langChange.mp3")
+                        playsound("langChange.mp3")
+                        os.remove("langChange.mp3")
+
+                    # if you want to translate to french
+
+                    elif mouseClickDetections.chosenLang == "French":
+                        mouseClickDetections.translateLang = "fr"
+                        tts = gtts.gTTS("French", lang=userInterface.lang,
+                                        tld=userInterface.tld)
+                        tts.save("langChange.mp3")
+                        playsound("langChange.mp3")
+                        os.remove("langChange.mp3")
+
+                    # if you want to translate to spanish
+
+                    elif mouseClickDetections.chosenLang == "Spanish":
+                        mouseClickDetections.translateLang = "es"
+                        tts = gtts.gTTS("Spanish", lang=userInterface.lang,
+                                        tld=userInterface.tld)
+                        tts.save("langChange.mp3")
+                        playsound("langChange.mp3")
+                        os.remove("langChange.mp3")
+
+                    # selection changes everytime up is pressed
+
+                    mouseClickDetections.langIdx += 1
+
+            elif key.char == "x":
                 mouse = Controller()
                 mouseClickDetections.mouseLoc = list(mouse.position)
                 mouseClickDetections.mouseLoc[1] -= 100
@@ -378,15 +450,32 @@ def mouseClickDetections():
                                 on_press.stringWCoordDict[string][1] < mouseClickDetections.mouseLoc[1] < \
                                 on_press.stringWCoordDict[string][3]:
 
-                            # perform text to speech on extracted string
+                            if not mouseClickDetections.translateNextSec:
+                                # perform text to speech on extracted string
 
-                            tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
-                            tts.save("ttsOnString.mp3")
-                            playsound("ttsOnString.mp3")
+                                tts = gtts.gTTS(string, lang=userInterface.lang, tld=userInterface.tld)
+                                tts.save("ttsOnString.mp3")
+                                playsound("ttsOnString.mp3")
 
-                            # remove extra files created for screen reading process
+                                # remove extra files created for screen reading process
 
-                            os.remove('ttsOnString.mp3')
+                                os.remove('ttsOnString.mp3')
+
+                            else:
+                                # TRANSLATE EXTRACTED STRING
+                                translator = Translator()
+                                transStr = translator.translate(string, dest=mouseClickDetections.translateLang)
+
+                                tts = gtts.gTTS(transStr.text, lang=mouseClickDetections.translateLang)
+                                tts.save("ttsTransString.mp3")
+                                playsound("ttsTransString.mp3")
+
+                                # remove extra files created for screen reading process
+                                os.remove('ttsTransString.mp3')
+
+                                mouseClickDetections.translateNextSec = False
+
+                            # check if mouse is hovering over a hyperlink
 
                             hovering = hoveringOverHyperlink()
 
@@ -404,18 +493,18 @@ def mouseClickDetections():
 
                                 # remove extra files created for tts process
                                 os.remove('ttsOnString.mp3')
-
                     on_press.pgChange = False
 
         except AttributeError:
             # when alt key pressed start listening for a mouse press
             if key == keyboard.Key.alt:
-                imgsLocs = {}
+
                 # moves mouse to the top left of the page
 
                 mouse = Controller()
                 mouse.position = (0, 1080)
-                tts = gtts.gTTS("The mouse has been moved to the bottom left of the page", lang=userInterface.lang,
+                tts = gtts.gTTS("The mouse has been moved to the bottom left of the page. Do not move the mouse"
+                                "until the webpage has been processed", lang=userInterface.lang,
                                 tld=userInterface.tld)
                 tts.save("mouseMove.mp3")
                 playsound("mouseMove.mp3")
@@ -467,6 +556,13 @@ def mouseClickDetections():
                 mouseClickDetections.altPressed = True
                 mouseClickDetections.scrolledCount = 0
 
+                # for translation
+
+                mouseClickDetections.currentlyTranslating = False
+                mouseClickDetections.translateNextSec = False
+                mouseClickDetections.translateLang = "en"
+                mouseClickDetections.langIdx = 0
+
             # to leave the screen reader
 
             elif key == keyboard.Key.esc:
@@ -494,6 +590,20 @@ def mouseClickDetections():
 
                 mListener.stop()
                 return False
+
+            # for translation
+
+            elif key == keyboard.Key.enter:
+                # language for translation is selected
+                tts = gtts.gTTS(f"You have selected the language {mouseClickDetections.chosenLang}",
+                                lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("selectLang.mp3")
+                playsound("selectLang.mp3")
+                os.remove("selectLang.mp3")
+
+                mouseClickDetections.translateNextSec = True
+                mouseClickDetections.currentlyTranslating = False
 
     def on_click(x, y, button, pressed):
         # detects the mouse coordinates via the mouse listener
@@ -564,20 +674,24 @@ def userInterface():
     instructions = """This application is a screen reader that helps you navigate websites. 
     In order to use this screen reader go to the webpage that you want to be read 
     and press alt. When you press alt your mouse will be moved to the 
-    bottom left of the page. In order to stop the program press 
-    Escape. You can now begin to use the screen reader. 
+    bottom left of the page. To use the screen reader itself, hover over a section you want to be read
+    and press x. In order to stop the program press Escape. 
     To change the dialect press D. In order to repeat the 
     instructions in English press the spacebar. To repeat the 
-    instructions in arabic press A. To leave the instructions press L."""
+    instructions in arabic press A. To leave the instructions press L.
+    You may now begin using the screen reader"""
 
     # instruction in arabic for the program
 
-    instructionsAr = "هذا التطبيق عبارة" \
-                     " عن قارئ" \
-                     " شاشة يساعدك على تصفح مواقع الويب. لاستخدام قارئ الشاشة هذا ، انتقل إلى صفحة الويب التي تريد" \
-                     " قراءتها واضغط على مفتاح alt ، وعند الضغط على مفتاح بديل ، سيتم نقل الماوس إلى أسفل يسار الصفحة" \
-                     ". لإيقاف البرنامج اضغط Escape. يمكنك الآن البدء في استخدام قارئ الشاشة. لتكرار التعليمات باللغة" \
-                     " الإنجليزية اضغط على مفتاح المسافة. لتكرار التعليمات بالعربية اضغط أ. لترك التعليمات اضغط على L."
+    instructionsAr = """ هذا التطبيق عبارة عن قارئ شاشة يساعدك على تصفح مواقع الويب.
+    لاستخدام قارئ الشاشة هذا ، انتقل إلى صفحة الويب التي تريد قراءتها
+    واضغط على بديل. عند الضغط على مفتاح بديل ، سيتم نقل الماوس إلى ملف
+    أسفل يسار الصفحة. لاستخدام قارئ الشاشة نفسه ، مرر مؤشر الماوس فوق القسم الذي تريد قراءته
+    واضغط على x. لإيقاف البرنامج اضغط Escape.
+     لتكرار
+    التعليمات باللغة الإنجليزية اضغط على مفتاح المسافة. لتكرار ال
+    التعليمات في الصحافة العربية أ. لترك التعليمات اضغط L.
+    يمكنك الآن البدء في استخدام قارئ الشاشة"""
 
     def on_press(key):
 
@@ -745,6 +859,7 @@ def userInterface():
     if userInterface.screenReaderLanguage == "Eng":
         mouseClickDetections()
     elif userInterface.screenReaderLanguage == "Ar":
+        # Arabic version has less features
         mouseClickDetectionsAr()
 
 

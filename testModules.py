@@ -505,100 +505,100 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 #
 # DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
 
-execution_path = os.getcwd()
-detector = ObjectDetection()
-detector.setModelTypeAsRetinaNet()
-detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
-detector.loadModel()
-detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/imgTest.jpg"),
-                                             output_image_path=os.path.join(execution_path, "imagenew.jpg"))
-
-# determine all image locations and what objects are in the image
-imgLocs = {}
-for (detect, idx) in zip(detections, range(len(detections))):
-    # deals with the same object found in different locations
-    if detect['name'] in imgLocs:
-        imgLocs[detect['name'] + str(idx)] = detect['box_points']
-    else:
-        imgLocs[detect['name']] = detect['box_points']
-
-
-# to avoid repetition of already combined objects
-
-combinedImgsCheck = []
-combinedImgsNestLst = []
-
-# find images that contain more than one object, based on distance or overlap of bounding box
-
-for (obj1, idx) in zip(imgLocs, range(len(imgLocs))):
-
-    similarCoord = [obj1]
-
-    for (obj2, idx2) in zip(imgLocs, range(len(imgLocs))):
-
-        if obj2 not in similarCoord and obj2 not in combinedImgsCheck:
-
-            # extract coordinates from dictionary
-
-            [img1XStart, img1YStart, img1XEnd, img1YEnd] = imgLocs[obj1]
-            [img2XStart, img2YStart, img2XEnd, img2YEnd] = imgLocs[obj2]
-
-            # 2 SCENARIOS - check if bounding boxes of objects overlap or are close to one another
-
-            # 1 - overlap
-
-            if ((img1XStart <= img2XStart <= img1XEnd) or (img1XStart <= img2XEnd <= img1XEnd)) and \
-                    (img1YStart <= img2YStart <= img1YEnd) or (img1YStart <= img2YEnd <= img1YEnd):
-                similarCoord.append(obj2)
-
-            # 2 - close to each other
-
-            elif ((img1XEnd <= img2XStart <= img1XEnd + 10) or (img1XStart - 10 <= img2XEnd <= img1XStart)) and \
-                    ((img1YEnd <= img2YStart <= img1YEnd + 10) or (img1YStart - 10 <= img2YEnd <= img1YStart)):
-                similarCoord.append(obj2)
-
-    # combine into a list of combined images
-
-    if len(similarCoord) > 1:
-        combinedImgsNestLst.append(similarCoord)
-        combinedImgsCheck += similarCoord
-
-#  if multiple objects are found in an image; combine their locations and text into a user-friendly manner
-
-newImgLocs = {}
-for imgName in imgLocs:
-    if imgName not in combinedImgsCheck:
-        newImgLocs[imgName] = imgLocs[imgName]
-    else:
-        for combinedImgLst in combinedImgsNestLst:
-            combinedName = " ".join(combinedImgLst)
-            allCoord = [[], [], [], []]
-
-            # combine the coordinates of all objects that overlap or close to each other to make one bigger object
-            for combinedImgName in combinedImgLst:
-                allCoord[0].append(imgLocs[combinedImgName][0])
-                allCoord[1].append(imgLocs[combinedImgName][1])
-                allCoord[2].append(imgLocs[combinedImgName][2])
-                allCoord[3].append(imgLocs[combinedImgName][3])
-
-            # combine the coordinates
-            combinedCoord = [min(allCoord[0]), min(allCoord[1]), max(allCoord[2]), max(allCoord[3])]
-
-            newImgLocs[combinedName] = combinedCoord
-
-# change text to be user friendly with use in text to speech
-finalImgLocs = {}
-
-for name in newImgLocs:
-    nameLst = name.split(" ")
-    if len(nameLst) > 1:
-        firstPtLst = " ".join(nameLst[:-1])
-        secondPtLst = nameLst[-1]
-        finalImgLocs[f"You are hovering over an image that contains {firstPtLst} and {secondPtLst}"] = newImgLocs[name]
-    else:
-        finalImgLocs[f"You are hovering over an image that contains {nameLst[0]}"] = newImgLocs[name]
-
-print(finalImgLocs)
+# execution_path = os.getcwd()
+# detector = ObjectDetection()
+# detector.setModelTypeAsRetinaNet()
+# detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
+# detector.loadModel()
+# detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/imgTest.jpg"),
+#                                              output_image_path=os.path.join(execution_path, "imagenew.jpg"))
+#
+# # determine all image locations and what objects are in the image
+# imgLocs = {}
+# for (detect, idx) in zip(detections, range(len(detections))):
+#     # deals with the same object found in different locations
+#     if detect['name'] in imgLocs:
+#         imgLocs[detect['name'] + str(idx)] = detect['box_points']
+#     else:
+#         imgLocs[detect['name']] = detect['box_points']
+#
+#
+# # to avoid repetition of already combined objects
+#
+# combinedImgsCheck = []
+# combinedImgsNestLst = []
+#
+# # find images that contain more than one object, based on distance or overlap of bounding box
+#
+# for (obj1, idx) in zip(imgLocs, range(len(imgLocs))):
+#
+#     similarCoord = [obj1]
+#
+#     for (obj2, idx2) in zip(imgLocs, range(len(imgLocs))):
+#
+#         if obj2 not in similarCoord and obj2 not in combinedImgsCheck:
+#
+#             # extract coordinates from dictionary
+#
+#             [img1XStart, img1YStart, img1XEnd, img1YEnd] = imgLocs[obj1]
+#             [img2XStart, img2YStart, img2XEnd, img2YEnd] = imgLocs[obj2]
+#
+#             # 2 SCENARIOS - check if bounding boxes of objects overlap or are close to one another
+#
+#             # 1 - overlap
+#
+#             if ((img1XStart <= img2XStart <= img1XEnd) or (img1XStart <= img2XEnd <= img1XEnd)) and \
+#                     (img1YStart <= img2YStart <= img1YEnd) or (img1YStart <= img2YEnd <= img1YEnd):
+#                 similarCoord.append(obj2)
+#
+#             # 2 - close to each other
+#
+#             elif ((img1XEnd <= img2XStart <= img1XEnd + 10) or (img1XStart - 10 <= img2XEnd <= img1XStart)) and \
+#                     ((img1YEnd <= img2YStart <= img1YEnd + 10) or (img1YStart - 10 <= img2YEnd <= img1YStart)):
+#                 similarCoord.append(obj2)
+#
+#     # combine into a list of combined images
+#
+#     if len(similarCoord) > 1:
+#         combinedImgsNestLst.append(similarCoord)
+#         combinedImgsCheck += similarCoord
+#
+# #  if multiple objects are found in an image; combine their locations and text into a user-friendly manner
+#
+# newImgLocs = {}
+# for imgName in imgLocs:
+#     if imgName not in combinedImgsCheck:
+#         newImgLocs[imgName] = imgLocs[imgName]
+#     else:
+#         for combinedImgLst in combinedImgsNestLst:
+#             combinedName = " ".join(combinedImgLst)
+#             allCoord = [[], [], [], []]
+#
+#             # combine the coordinates of all objects that overlap or close to each other to make one bigger object
+#             for combinedImgName in combinedImgLst:
+#                 allCoord[0].append(imgLocs[combinedImgName][0])
+#                 allCoord[1].append(imgLocs[combinedImgName][1])
+#                 allCoord[2].append(imgLocs[combinedImgName][2])
+#                 allCoord[3].append(imgLocs[combinedImgName][3])
+#
+#             # combine the coordinates
+#             combinedCoord = [min(allCoord[0]), min(allCoord[1]), max(allCoord[2]), max(allCoord[3])]
+#
+#             newImgLocs[combinedName] = combinedCoord
+#
+# # change text to be user friendly with use in text to speech
+# finalImgLocs = {}
+#
+# for name in newImgLocs:
+#     nameLst = name.split(" ")
+#     if len(nameLst) > 1:
+#         firstPtLst = " ".join(nameLst[:-1])
+#         secondPtLst = nameLst[-1]
+#         finalImgLocs[f"You are hovering over an image that contains {firstPtLst} and {secondPtLst}"] = newImgLocs[name]
+#     else:
+#         finalImgLocs[f"You are hovering over an image that contains {nameLst[0]}"] = newImgLocs[name]
+#
+# print(finalImgLocs)
 
 # img = cv2.imread('sampleImages/imgTest.jpg')
 #
@@ -608,3 +608,8 @@ print(finalImgLocs)
 #
 # cv2.imshow('img', img)
 # cv2.waitKey(0)
+
+from googletrans import Translator, constants
+translator = Translator()
+translation = translator.translate("Hello", dest="ar")
+print(translation.text)
