@@ -568,7 +568,6 @@ for (obj1, idx) in zip(imgLocs, range(len(imgLocs))):
 #  if multiple objects are found in an image; combine their locations and text into a user-friendly manner
 
 newImgLocs = {}
-print(imgLocs)
 for imgName in imgLocs:
     if imgName not in combinedImgsCheck:
         newImgLocs[imgName] = imgLocs[imgName]
@@ -587,6 +586,13 @@ for imgName in imgLocs:
             # combine the coordinates
             combinedCoord = [min(allCoord[0]), min(allCoord[1]), max(allCoord[2]), max(allCoord[3])]
 
-            newImgLocs[combinedImgName] = combinedCoord
+            newImgLocs[combinedName] = combinedCoord
 
-print(newImgLocs)
+img = cv2.imread('sampleImages/imgTest.jpg')
+
+for i in newImgLocs:
+    img = cv2.rectangle(img, (newImgLocs[i][0], newImgLocs[i][1]),
+                        (newImgLocs[i][2], newImgLocs[i][3]), (0, 0, 0), 2)
+
+cv2.imshow('img', img)
+cv2.waitKey(0)
