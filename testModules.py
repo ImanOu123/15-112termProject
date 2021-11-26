@@ -466,7 +466,6 @@ import pytesseract
 from cmu_112_graphics import *
 from pytesseract import Output
 
-
 # urlImg = pyautogui.screenshot('fullPgScreenshot.png', region=(100, 50, 1000, 51))
 #
 # pngToJpg = cv2.imread('fullPgScreenshot.png')
@@ -493,6 +492,7 @@ from pytesseract import Output
 # print(string)
 
 import os
+
 # BUG FIX -
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -502,13 +502,17 @@ from imageai.Detection import ObjectDetection
 # https://medium.datadriveninvestor.com/ai-object-detection-using-only-10-lines-of-code-imageai-89d3ba9886ea
 
 # DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
-
+#
 execution_path = os.getcwd()
 detector = ObjectDetection()
 detector.setModelTypeAsRetinaNet()
-detector.setModelPath( os.path.join(execution_path , "resnet50_coco_best_v2.1.0.h5"))
+detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
 detector.loadModel()
-detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path , "sampleImages/fullPage1.jpg"),
-                                             output_image_path=os.path.join(execution_path , "imagenew.jpg"))
+detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/fullPage3.jpg"),
+                                             output_image_path=os.path.join(execution_path, "imagenew.jpg"))
+print(detections)
 for eachObject in detections:
     print(eachObject["name"], " : ", eachObject["percentage_probability"])
+
+# 'box_points' [90, 165, 340, 606]
+

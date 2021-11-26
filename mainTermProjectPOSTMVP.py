@@ -10,12 +10,10 @@ from cmu_112_graphics import *
 from pytesseract import Output
 from mainTermProjectArabicVer import *
 
-
 # Post-MVP Modules
-
+from imageai.Detection import ObjectDetection
 
 # GITHUB REPO - https://github.com/ImanOu123/15-112termProject
-
 
 def distinguishSections(img):
     # perform OCR on screenshot of full page
@@ -239,6 +237,40 @@ def hoveringOverHyperlink():
         return [False]
 
 
+# NEW FEATURE - detects images on the webpage and determines their location
+
+def detectingImgsOnWebpage(imgPath):
+    # BUG FIX - for tensor flow error
+    # (GTS, StackOverFlow, 2021)
+    # https://stackoverflow.com/questions/66092421/how-to-rebuild-tensorflow-with-the-compiler-flags
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+    # Using a pretrained model to detect the location of an image
+
+    # (Priyal, Medium, 2020)
+    # https://medium.datadriveninvestor.com/ai-object-detection-using-only-10-lines-of-code-imageai-89d3ba9886ea
+    #
+    # DOWNLOAD PREDEFINED MODEL FROM HERE - https://github.com/priyalwalpita/ai_object_detection
+
+    execution_path = os.getcwd()
+    detector = ObjectDetection()
+    detector.setModelTypeAsRetinaNet()
+    detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
+    detector.loadModel()
+    detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/fullPage3.jpg"),
+                                                 output_image_path=os.path.join(execution_path, "imagenew.jpg"))
+
+    # determine all image locations and what objects are in the image
+    imgLocs = {}
+    for obj in detections:
+
+
+    # find images that contain more than one object, based on distance or overlap of bounding box
+
+    #  if multiple objects are found in an image; combine their locations and text into a user-friendly manner
+
+
+
 def mouseClickDetections():
     # in order to run the program, the user must press alt
 
@@ -296,7 +328,7 @@ def mouseClickDetections():
         except AttributeError:
             # when alt key pressed start listening for a mouse press
             if key == keyboard.Key.alt:
-
+                imgsLocs = {}
                 # moves mouse to the top left of the page
 
                 mouse = Controller()
@@ -312,6 +344,8 @@ def mouseClickDetections():
 
                 img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
 
+                imgsLocs = detectingImgsOnWebpage('fullPgScreenshot.png')
+
                 # for detecting whether hyperlink is pressed
 
                 mouseClickDetections.urlImg = pyautogui.screenshot('urlScreenshotOG.png', region=(100, 50, 1000, 51))
@@ -324,6 +358,7 @@ def mouseClickDetections():
                 # extract sections of webpage
 
                 on_press.stringWCoordDict = distinguishSections('fullPgScreenshot.jpg')
+                on_press.stringWCoordDict.update(imgsLocs)
 
                 # When the page is prepared for TTS
 
@@ -405,7 +440,6 @@ def mouseClickDetections():
 
             os.remove('ttsPgChange.mp3')
             on_press.pgChange = True
-
 
     # used to listen for the key and mouse presses - (wowowo878787, StackOverFlow, 2019)
     # https://stackoverflow.com/questions/45973453/using-mouse-and-keyboard-listeners-together-in-python
