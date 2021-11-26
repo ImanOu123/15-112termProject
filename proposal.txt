@@ -6,8 +6,8 @@ Project Description:
 
     The project is a screen reader for the visually impaired which will aid
     visually impaired users to navigate websites. This aid will be in the form
-    of text-to-speech that will occur whenever the user clicks sections of the
-    webpage.
+    of text-to-speech that will occur whenever the user hovers over sections of the
+    webpage and presses X.
 
 Competitive Analysis:
 
@@ -99,3 +99,17 @@ TP2 Update:
         in the tts can be changed and an arabic version of the OCR can be accessed.
         5. An arabic version of the program has been created in which the instructions are in arabic and the OCR
         reads arabic text
+
+TP3 Update:
+    The following are the updates I have made to the code for TP3:
+        1. Rather than clicking, the user will hover over the section they want to be read and press X.
+        2. The program checks if a hyperlink has been activated by reading the URL of the page
+        3. The program attempts to check if the user is hovering over a hyperlink (this section has a low accuracy rate)
+        4. The program performs image detection, where it locates where images are on the webpage and reads what's in
+        them
+        5. A new feature has been added where the user can translate sections of the webpage into their desired language
+        6. The program can now better detect scrolling
+
+    More modules used:
+        1. Image AI
+        2. Google Translation API

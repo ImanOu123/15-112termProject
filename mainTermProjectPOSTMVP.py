@@ -6,7 +6,6 @@ from pynput import mouse
 from pynput.mouse import Controller
 import cv2
 import pytesseract
-from cmu_112_graphics import *
 from pytesseract import Output
 from mainTermProjectArPOSTMVP import *
 
