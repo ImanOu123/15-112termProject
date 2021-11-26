@@ -575,7 +575,7 @@ for imgName in imgLocs:
     else:
         for combinedImgLst in combinedImgsNestLst:
             combinedName = " ".join(combinedImgLst)
-            allCoord = [[],[],[],[]]
+            allCoord = [[], [], [], []]
 
             # combine the coordinates of all objects that overlap or close to each other to make one bigger object
             for combinedImgName in combinedImgLst:
