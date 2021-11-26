@@ -675,7 +675,7 @@ def userInterface():
     In order to use this screen reader go to the webpage that you want to be read 
     and press alt. When you press alt your mouse will be moved to the 
     bottom left of the page. To use the screen reader itself, hover over a section you want to be read
-    and press x. In order to stop the program press Escape. 
+    and press x. During the screen reading you can press t for translation. In order to stop the program press Escape. 
     To change the dialect press D. In order to repeat the 
     instructions in English press the spacebar. To repeat the 
     instructions in arabic press A. To leave the instructions press L.
