@@ -87,6 +87,6 @@ How to install any needed libraries:
         https://www.thepythoncode.com/article/translate-text-in-python
 
 Shortcut Commands:
-During the instruction stage:
+During the instruction stage after program says "Press spacebar...":
     1. Press L to skip instructions and directly use the screen reader
     2. Press A to directly go to the arabic instructions
