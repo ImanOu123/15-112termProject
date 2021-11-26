@@ -216,8 +216,6 @@ def checkForHyperlinkPress():
 # This detection occurs only after user requests screen reading of section
 
 def hoveringOverHyperlink():
-    # Note - works occasionally
-
     urlImg = pyautogui.screenshot('tinyURLInCorner.png', region=(0, 870, 720, 900))
 
     pngToJpg = cv2.imread('tinyURLInCorner.png')
@@ -242,8 +240,6 @@ def hoveringOverHyperlink():
 # NEW FEATURE - detects images on the webpage and determines their location
 
 def detectingImgsOnWebpage(imgPath):
-    # Note - works based on accuracy of pretrained model
-
     # BUG FIX - for tensor flow error
     # (GTS, StackOverFlow, 2021)
     # https://stackoverflow.com/questions/66092421/how-to-rebuild-tensorflow-with-the-compiler-flags
@@ -261,96 +257,18 @@ def detectingImgsOnWebpage(imgPath):
     detector.setModelTypeAsRetinaNet()
     detector.setModelPath(os.path.join(execution_path, "resnet50_coco_best_v2.1.0.h5"))
     detector.loadModel()
-    detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, imgPath),
+    detections = detector.detectObjectsFromImage(input_image=os.path.join(execution_path, "sampleImages/fullPage3.jpg"),
                                                  output_image_path=os.path.join(execution_path, "imagenew.jpg"))
 
     # determine all image locations and what objects are in the image
     imgLocs = {}
-    for (detect, idx) in zip(detections, range(len(detections))):
-        # deals with the same object found in different locations
-        if detect['name'] in imgLocs:
-            imgLocs[detect['name'] + str(idx)] = detect['box_points']
-        else:
-            imgLocs[detect['name']] = detect['box_points']
-
-    # to avoid repetition of already combined objects
-
-    combinedImgsCheck = []
-    combinedImgsNestLst = []
+    for obj in detections:
+        pass
 
     # find images that contain more than one object, based on distance or overlap of bounding box
 
-    for (obj1, idx) in zip(imgLocs, range(len(imgLocs))):
-
-        similarCoord = [obj1]
-
-        for (obj2, idx2) in zip(imgLocs, range(len(imgLocs))):
-
-            if obj2 not in similarCoord and obj2 not in combinedImgsCheck:
-
-                # extract coordinates from dictionary
-
-                [img1XStart, img1YStart, img1XEnd, img1YEnd] = imgLocs[obj1]
-                [img2XStart, img2YStart, img2XEnd, img2YEnd] = imgLocs[obj2]
-
-                # 2 SCENARIOS - check if bounding boxes of objects overlap or are close to one another
-
-                # 1 - overlap
-
-                if ((img1XStart <= img2XStart <= img1XEnd) or (img1XStart <= img2XEnd <= img1XEnd)) and \
-                        (img1YStart <= img2YStart <= img1YEnd) or (img1YStart <= img2YEnd <= img1YEnd):
-                    similarCoord.append(obj2)
-
-                # 2 - close to each other
-
-                elif ((img1XEnd <= img2XStart <= img1XEnd + 10) or (img1XStart - 10 <= img2XEnd <= img1XStart)) and \
-                        ((img1YEnd <= img2YStart <= img1YEnd + 10) or (img1YStart - 10 <= img2YEnd <= img1YStart)):
-                    similarCoord.append(obj2)
-
-        # combine into a list of combined images
-
-        if len(similarCoord) > 1:
-            combinedImgsNestLst.append(similarCoord)
-            combinedImgsCheck += similarCoord
-
     #  if multiple objects are found in an image; combine their locations and text into a user-friendly manner
 
-    newImgLocs = {}
-    for imgName in imgLocs:
-        if imgName not in combinedImgsCheck:
-            newImgLocs[imgName] = imgLocs[imgName]
-        else:
-            for combinedImgLst in combinedImgsNestLst:
-                combinedName = " ".join(combinedImgLst)
-                allCoord = [[], [], [], []]
-
-                # combine the coordinates of all objects that overlap or close to each other to make one bigger object
-                for combinedImgName in combinedImgLst:
-                    allCoord[0].append(imgLocs[combinedImgName][0])
-                    allCoord[1].append(imgLocs[combinedImgName][1])
-                    allCoord[2].append(imgLocs[combinedImgName][2])
-                    allCoord[3].append(imgLocs[combinedImgName][3])
-
-                # combine the coordinates
-                combinedCoord = [min(allCoord[0]), min(allCoord[1]), max(allCoord[2]), max(allCoord[3])]
-
-                newImgLocs[combinedName] = combinedCoord
-
-    # change text to be user friendly with use in text to speech
-    finalImgLocs = {}
-
-    for name in newImgLocs:
-        nameLst = name.split(" ")
-        if len(nameLst) > 1:
-            firstPtLst = " ".join(nameLst[:-1])
-            secondPtLst = nameLst[-1]
-            finalImgLocs[f"You are hovering over an image that contains {firstPtLst} and {secondPtLst}"] = newImgLocs[
-                name]
-        else:
-            finalImgLocs[f"You are hovering over an image that contains {nameLst[0]}"] = newImgLocs[name]
-
-    os.remove("imagenew.jpg")
-    return finalImgLocs
 
 
 def mouseClickDetections():
@@ -426,15 +344,7 @@ def mouseClickDetections():
 
                 img = pyautogui.screenshot('fullPgScreenshot.png', region=(0, 100, 1440, 900))
 
-                # use full color images for image detection on webpage
-
-                fullColorVer = cv2.imread('fullPgScreenshot.png')
-                cv2.imwrite('fullPgScreenshotfullColor.jpg', fullColorVer)
-
-                try:
-                    imgsLocs = detectingImgsOnWebpage('fullPgScreenshotfullColor.jpg')
-                except:
-                    imgsLocs = {}
+                imgsLocs = detectingImgsOnWebpage('fullPgScreenshot.png')
 
                 # for detecting whether hyperlink is pressed
 
@@ -487,8 +397,6 @@ def mouseClickDetections():
                     os.remove('urlScreenshotOG.jpg')
                 if os.path.isfile('urlScreenshotOG.png'):
                     os.remove('urlScreenshotOG.png')
-                if os.path.isfile('fullPgScreenshotfullColor.jpg'):
-                    os.remove('fullPgScreenshotfullColor.jpg')
 
                 # Stop mouse and keyboard listeners
 
@@ -622,19 +530,12 @@ def userInterface():
             elif key.char == "l":
 
                 # message for leaving instruction page
-                if userInterface.screenReaderLanguage == "Eng":
-                    tts = gtts.gTTS("Remember to press Alt when you are ready", lang=userInterface.lang,
-                                    tld=userInterface.tld)
-                    tts.save("leaveMessage.mp3")
-                    playsound("leaveMessage.mp3")
-                    os.remove("leaveMessage.mp3")
-                elif userInterface.screenReaderLanguage == "Ar":
-                    leaveMsgAr = "تذكر أن تضغط على Alt عندما تكون جاهزًا"
-                    tts = gtts.gTTS(leaveMsgAr, lang="ar")
-                    tts.save("leaveMessage.mp3")
-                    playsound("leaveMessage.mp3")
-                    os.remove("leaveMessage.mp3")
 
+                tts = gtts.gTTS("Remember to press Alt when you are ready", lang=userInterface.lang,
+                                tld=userInterface.tld)
+                tts.save("leaveMessage.mp3")
+                playsound("leaveMessage.mp3")
+                os.remove("leaveMessage.mp3")
                 return False
 
         except AttributeError:

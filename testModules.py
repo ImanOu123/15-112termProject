@@ -522,8 +522,6 @@ for (detect, idx) in zip(detections, range(len(detections))):
     else:
         imgLocs[detect['name']] = detect['box_points']
 
-# zoom into image if only one object is found - allows for better detection
-
 
 # to avoid repetition of already combined objects
 
@@ -588,11 +586,25 @@ for imgName in imgLocs:
 
             newImgLocs[combinedName] = combinedCoord
 
-img = cv2.imread('sampleImages/imgTest.jpg')
+# change text to be user friendly with use in text to speech
+finalImgLocs = {}
 
-for i in newImgLocs:
-    img = cv2.rectangle(img, (newImgLocs[i][0], newImgLocs[i][1]),
-                        (newImgLocs[i][2], newImgLocs[i][3]), (0, 0, 0), 2)
+for name in newImgLocs:
+    nameLst = name.split(" ")
+    if len(nameLst) > 1:
+        firstPtLst = " ".join(nameLst[:-1])
+        secondPtLst = nameLst[-1]
+        finalImgLocs[f"You are hovering over an image that contains {firstPtLst} and {secondPtLst}"] = newImgLocs[name]
+    else:
+        finalImgLocs[f"You are hovering over an image that contains {nameLst[0]}"] = newImgLocs[name]
 
-cv2.imshow('img', img)
-cv2.waitKey(0)
+print(finalImgLocs)
+
+# img = cv2.imread('sampleImages/imgTest.jpg')
+#
+# for i in newImgLocs:
+#     img = cv2.rectangle(img, (newImgLocs[i][0], newImgLocs[i][1]),
+#                         (newImgLocs[i][2], newImgLocs[i][3]), (0, 0, 0), 2)
+#
+# cv2.imshow('img', img)
+# cv2.waitKey(0)
